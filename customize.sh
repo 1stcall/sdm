@@ -17,7 +17,7 @@ fi
 rsync -ah --progress ${baseDirectory}/${baseImageDirectory}/${baseImage} ${baseDirectory}/output/${hostName}.img
 
 ${baseDirectory}/sdm --customize ${baseDirectory}/output/${hostName}.img \
-    --apps "zram-tools nmap tmux git command-not-found bash-completion gparted btrfs-tools systemd-container" \
+    --apps "zram-tools nmap tmux git command-not-found bash-completion gparted btrfs-tools systemd-container jq" \
     --apt-dist-upgrade --disable piwiz,swap \
     --dtoverlay i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host \
     --dtparam i2c_vc=on \
