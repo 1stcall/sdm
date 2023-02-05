@@ -6,12 +6,18 @@ set -o nounset                                      # Treat unset variables as a
 set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
                                                     # a non-zero status, or zero if no command exited with a non-zero status.
 declare baseDirectory="/home/carl/dev/sdm"
-declare baseImage="${baseDirectory}/baseos/2022-09-22-raspios-bullseye-arm64-lite.img"
+declare baseImage="2022-09-22-raspios-bullseye-arm64-lite.img"
+declare baseImageDirectory="baseos"
 declare hostName="rpicm4-1"
 
-rsync -ah --progress ${baseImage} ${baseDirectory}/output/${hostName}.img
+if [ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ] ; then
+    curl --verbose https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-09-26/${baseImage}.xz | unxz - > ${baseDirectory}/${baseImageDirectory}/${baseImage}
+fi
+
+rsync -ah --progress ${baseDirectory}/${baseImageDirectory}/${baseImage} ${baseDirectory}/output/${hostName}.img
+
 ${baseDirectory}/sdm --customize ${baseDirectory}/output/${hostName}.img \
-    --apps "zram-tools nmap tmux" \
+    --apps "zram-tools nmap tmux git command-not-found bash-completion gparted btrfs-tools systemd-container" \
     --apt-dist-upgrade --disable piwiz,swap \
     --dtoverlay i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host \
     --dtparam i2c_vc=on \
@@ -24,5 +30,6 @@ ${baseDirectory}/sdm --customize ${baseDirectory}/output/${hostName}.img \
     --user carl \
     --wpa /etc/wpa_supplicant/wpa_supplicant.conf \
     --extend \
-    --xmb 2561 \
-    --batch
+    --xmb 256 \
+    --batch \
+    --cscript ${baseDirectory}/sdm-customphase

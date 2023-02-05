@@ -170,7 +170,7 @@ function sdm_burndevfile() {
 	loopdev=$(losetup --show -P -f $burnfilefile)
 	setdiskid $loopdev $newdiskid
 	domount "$burnfilefile"
-	expandroot=1           # Force Expand Root into the newly written IMG so it will happen when burned to something with sdm
+#	expandroot=1           # Force Expand Root into the newly written IMG so it will happen when burned to something with sdm
     fi
     write_burnmsg "> Set new Disk ID '$newdiskid' in /etc/fstab and /boot/cmdline.txt"
     sed -i "s/${olddiskid}/${newdiskid}/g" $SDMPT/etc/fstab

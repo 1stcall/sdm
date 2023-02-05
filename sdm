@@ -140,6 +140,8 @@ function domount() {
 	notmounted $SDMPT/boot && errexit "? Error mounting --bind '$dimg'"
     elif [ $dimgdev -eq 0 ]
     then
+#    losetup --detach-all
+    [ "$loopdev" != "" ] && losetup -d $loopdev && loopdev=""
 	islooped $mimg && errexit "? IMG '$mimg' already attached to a loop device"
 	echo "* Mount IMG '$mimg'"
 	loopdev=$(losetup --show -P -f $mimg)

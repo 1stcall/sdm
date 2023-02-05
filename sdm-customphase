@@ -23,6 +23,11 @@ then
 
 # INSERT Your Custom Phase 0 code here
     
+    mkdir -p /mnt/sdm/etc/systemd/system/bluetooth.service.d/
+    rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
+
+# END Your Custom Phase 0 code here
+
     logtoboth "* $pfx Phase 0 Completed"
 
 elif [ "$phase" == "1" ]
@@ -37,6 +42,9 @@ then
     # INSERT your Custom Phase 1 customization stuff here
     # In Phase 1 all references to directories in the image can be direct
     #
+    git config --global user.name "Carl McAlwane"
+    git config --global user.email "carlmcalwane@hotmail.co.uk"
+    # END your Custom Phase 1 customization stuff here
     logfreespace "at end of $pfx Phase 1"
     logtoboth "* $pfx Phase 1 Completed"
 else
