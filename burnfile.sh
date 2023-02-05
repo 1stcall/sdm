@@ -8,4 +8,5 @@ set -o pipefail                                     # The return value of a pipe
 /home/carl/dev/sdm/sdm --burnfile /home/carl/dev/sdm/output/rpicm4-1-out.img \
     --host rpicm4-1.1stcall.uk \
     --regen-ssh-host-keys \
+    --fstab ${baseDirectory}/my-fstab \
     /home/carl/dev/sdm/output/rpicm4-1.img
