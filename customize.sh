@@ -30,6 +30,8 @@ ${baseDirectory}/sdm --customize ${baseDirectory}/output/${hostName}.img \
     --user carl \
     --wpa /etc/wpa_supplicant/wpa_supplicant.conf \
     --extend \
-    --xmb 256 \
+    --xmb 1024 \
     --batch \
     --cscript ${baseDirectory}/sdm-customphase
+
+${baseDirectory}/sdm --shrink
