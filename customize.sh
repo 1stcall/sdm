@@ -34,4 +34,4 @@ ${baseDirectory}/sdm --customize ${baseDirectory}/output/${hostName}.img \
     --batch \
     --cscript ${baseDirectory}/sdm-customphase
 
-${baseDirectory}/sdm --shrink
+${baseDirectory}/sdm --shrink ${baseDirectory}/output/${hostName}.img
