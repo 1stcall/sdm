@@ -1252,7 +1252,7 @@ else
     mkdir -p $SDMPT/$sdmdir/1piboot
     for f in sdm sdm-phase0 sdm-phase1 sdm-cparse sdm-readparams sdm-cmdsubs sdm-firstboot sdm-apt sdm-apt-cacher sdm-hotspot sdm-cportal sdm-logmsg sdm-gburn
     do
-	cp $src/$f $SDMPT/$sdmdir
+	cp -v $src/$f $SDMPT/$sdmdir
     done
     rm -f $SDMPT/usr/local/bin/sdm
     ln -s $sdmdir/sdm $SDMPT/usr/local/bin
