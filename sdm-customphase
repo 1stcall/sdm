@@ -23,6 +23,21 @@ then
 
 # INSERT Your Custom Phase 0 code here
 
+    logtoboth "* $pfx Creating directory bluetooth.service.d/" 
+    set -x
+    mkdir -pv /mnt/sdm/etc/systemd/system/bluetooth.service.d/
+    set +x
+
+    logtoboth "* $pfx Copying override.conf > bluetooth.service.d/"
+    set -x
+    rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
+    set +x
+
+    logtoboth "* $pfx Copying .bash_aliases > home directory"
+    set -x
+    rsync -av /home/carl/.bash_aliases /mnt/sdm/home/carl/.bash_aliases
+    set +x
+
 # END Your Custom Phase 0 code here
 
     logtoboth "* $pfx Phase 0 Completed"
@@ -55,21 +70,6 @@ else
     # In Phase post-install all references to directories in the image can be direct
     #
     
-    logtoboth "* $pfx Creating directory bluetooth.service.d/" 
-    set -x
-    mkdir -pv /mnt/sdm/etc/systemd/system/bluetooth.service.d/
-    set +x
-
-    logtoboth "* $pfx Copying override.conf > bluetooth.service.d/"
-    set -x
-    rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
-    set +x
-
-    logtoboth "* $pfx Copying .bash_aliases > home directory"
-    set -x
-    rsync -av /home/carl/.bash_aliases /mnt/sdm/home/carl/.bash_aliases
-    set +x
-
     logtoboth "* $pfx Configuring git"
     set -x
     su -u carl git config --global user.name "Carl McAlwane"
