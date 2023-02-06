@@ -41,6 +41,7 @@ ${baseDirectory}/sdm --customize ${baseDirectory}/output/${hostName}.img \
     --extend \
     --xmb 1536 \
     --batch \
+    --fstab ${baseDirectory}/my-fstab \
     --cscript ${baseDirectory}/sdm-customphase
     
 ${baseDirectory}/sdm --shrink ${baseDirectory}/output/${hostName}.img
