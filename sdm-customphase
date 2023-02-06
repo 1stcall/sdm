@@ -23,19 +23,24 @@ then
 
 # INSERT Your Custom Phase 0 code here
 
-    logtoboth "* $pfx Creating directory bluetooth.service.d/" 
+    logtoboth "** $pfx Creating directory bluetooth.service.d/" 
     set -x
     mkdir -pv /mnt/sdm/etc/systemd/system/bluetooth.service.d/
     set +x
 
-    logtoboth "* $pfx Copying override.conf > bluetooth.service.d/"
+    logtoboth "** $pfx Copying override.conf > bluetooth.service.d/"
     set -x
     rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
     set +x
 
-    logtoboth "* $pfx Copying .bash_aliases > home directory"
+    logtoboth "** $pfx Copying .bash_aliases > home directory"
     set -x
     rsync -av /home/carl/.bash_aliases /mnt/sdm/home/carl/.bash_aliases
+    set +x
+
+    logtoboth "** $pfx Creating directory ~/dev/"
+    set -x
+    mkdir -vp /mnt/sdm/home/carl/dev/
     set +x
 
 # END Your Custom Phase 0 code here
@@ -62,7 +67,7 @@ else
     # Post-install edits
     #
     loadparams
-    logtoboth "* $pfx Custom Phase post-install"
+    logtoboth "*. $pfx Custom Phase post-install"
     logfreespace "at start of $pfx Custom Phase post-install"
     
     #
@@ -70,12 +75,25 @@ else
     # In Phase post-install all references to directories in the image can be direct
     #
     
-    logtoboth "* $pfx Configuring git"
+    logtoboth "** $pfx Configuring git."
     set -x
     su carl --command="git config --global user.name \"Carl McAlwane\""
     su carl --command="git config --global user.email \"carlmcalwane@hotmail.co.uk\""
     set +x
-    
+
+    logtoboth "** $pfx Cloning git repositories."
+    set -x
+    su carl --command="git clone https://github.com/1stcall/sdm.git ~/dev/sdm/"
+    su carl --command="git clone https://github.com/1stcall/storagetoolkit.git ~/dev/storagetoolkit/"
+    set +x
+
+    logtoboth "** $pfx Runng apt-get update."
+    set -x
+    apt-get update
+    set +x
+
+##    read -n 1 -s -r -p "Press any key to continue..."
+
     # END Your Custom Phase post-install code here
 
     logfreespace "at end of $pfx Custom Phase post-install"

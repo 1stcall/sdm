@@ -10,6 +10,10 @@ declare baseImage="2022-09-22-raspios-bullseye-arm64-lite.img"
 declare baseImageDirectory="baseos"
 declare hostName="rpicm4-1"
 
+if [ -f "/home/carl/dev/sdm/output/rpicm4-1-out.img" ] ; then
+    mv -v "/home/carl/dev/sdm/output/rpicm4-1-out.img" "/home/carl/dev/sdm/output/rpicm4-1-out.img.old"
+fi
+
 /home/carl/dev/sdm/sdm --burnfile /home/carl/dev/sdm/output/rpicm4-1-out.img \
     --host rpicm4-1.1stcall.uk \
     --regen-ssh-host-keys \
