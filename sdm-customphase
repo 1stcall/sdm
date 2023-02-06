@@ -72,8 +72,8 @@ else
     
     logtoboth "* $pfx Configuring git"
     set -x
-    su -u carl git config --global user.name "Carl McAlwane"
-    su -u carl git config --global user.email "carlmcalwane@hotmail.co.uk"
+    su carl --command="git config --global user.name \"Carl McAlwane\""
+    su carl --command="git config --global user.email \"carlmcalwane@hotmail.co.uk\""
     set +x
     
     # END Your Custom Phase post-install code here
