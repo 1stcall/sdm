@@ -104,7 +104,7 @@ if [ "$fstab" != "" ]
 then
     logtoboth "> Copy fstab extension '$fstab' to $SDMPT/etc/sdm/assets and enable for FirstBoot"
     cp $fstab $SDMPT/etc/sdm/assets
-    echo "fstab=$(basename $fstab)" >> $SDMPT/etc/sdm/auto-1piboot.conf
+    echo "fstab=$(basename $SDMPT/etc/sdm/assets/$fstab)" >> $SDMPT/etc/sdm/auto-1piboot.conf
 fi
 
 #
