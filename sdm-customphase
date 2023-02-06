@@ -22,12 +22,6 @@ then
     logtoboth "* $pfx Phase 0"
 
 # INSERT Your Custom Phase 0 code here
-    logtoboth "* $pfx Creating directory bluetooth.service.d/" 
-    mkdir -pv /mnt/sdm/etc/systemd/system/bluetooth.service.d/
-    logtoboth "* $pfx Copying override.conf > bluetooth.service.d/"
-    rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
-    logtoboth "* $pfx Copying .bash_aliases > home directory"
-    rsync -av /home/carl/.bash_aliases /mnt/sdm/home/carl/.bash_aliases
 
 # END Your Custom Phase 0 code here
 
@@ -61,10 +55,25 @@ else
     # In Phase post-install all references to directories in the image can be direct
     #
     
+    logtoboth "* $pfx Creating directory bluetooth.service.d/" 
+    set -x
+    mkdir -pv /mnt/sdm/etc/systemd/system/bluetooth.service.d/
+    set +x
+
+    logtoboth "* $pfx Copying override.conf > bluetooth.service.d/"
+    set -x
+    rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
+    set +x
+
+    logtoboth "* $pfx Copying .bash_aliases > home directory"
+    set -x
+    rsync -av /home/carl/.bash_aliases /mnt/sdm/home/carl/.bash_aliases
+    set +x
+
     logtoboth "* $pfx Configuring git"
     set -x
-    git config --global user.name "Carl McAlwane"
-    git config --global user.email "carlmcalwane@hotmail.co.uk"
+    su -u carl git config --global user.name "Carl McAlwane"
+    su -u carl git config --global user.email "carlmcalwane@hotmail.co.uk"
     set +x
     
     # END Your Custom Phase post-install code here
