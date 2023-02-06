@@ -1,2 +1,3 @@
-baseos/
-output/
+baseos/*
+output/*
+*.out
