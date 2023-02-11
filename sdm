@@ -186,7 +186,8 @@ function extendimage() {
     local ldimg=$1 limgext=$2
     local line dsiz
     trap "ctrlcexit" SIGINT
-    dd if=/dev/zero bs=1M count=$limgext status=progress >> $ldimg 
+#    dd if=/dev/zero bs=1M count=$limgext status=progress >> $ldimg 
+    truncate --size="+${limgext}M" "${ldimg}"
     ddsts=$?
     trap SIGINT
     [ $ddsts -ne 0 ] && errexit "? Exiting due to dd error"

@@ -39,7 +39,7 @@ ${baseDirectory}/sdm --customize ${baseDirectory}/output/${hostName}.img \
     --user carl \
     --wpa /etc/wpa_supplicant/wpa_supplicant.conf \
     --extend \
-    --xmb 1536 \
+    --xmb 2049 \
     --batch \
     --fstab ${baseDirectory}/my-fstab \
     --cscript ${baseDirectory}/sdm-customphase
