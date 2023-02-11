@@ -96,6 +96,7 @@ else
     set -x
     su carl --command="git clone https://github.com/1stcall/sdm.git ~/dev/sdm/"
     su carl --command="git clone https://github.com/1stcall/storagetoolkit.git ~/dev/storagetoolkit/"
+    su carl --command="git clone https://github.com/1stcall/build-kernel.git ~/dev/build-kernel/"
     set +x
 
     logtoboth "** $pfx Runng apt-get update."
@@ -103,7 +104,12 @@ else
     apt-get update
     set +x
 
-##    read -n 1 -s -r -p "Press any key to continue..."
+    logtoboth "** $pfx Removing triggerhappy"
+    set -x
+    apt-get remove --purge triggerhappy
+    set +x
+
+    read -n 1 -s -r -p "Press any key to continue..."
 
     # END Your Custom Phase post-install code here
 
