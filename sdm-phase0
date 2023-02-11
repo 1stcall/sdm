@@ -100,7 +100,7 @@ done
 #
 # Copy fstab extension into the image
 #
-read -n 1 -s -r -p "fstab = \"$fstab\", Press any key to continue..."
+
 if [ "$fstab" != "" ]
 then
     logtoboth "> Copy fstab extension '$fstab' to $SDMPT/etc/sdm/assets and enable for FirstBoot"
