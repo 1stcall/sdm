@@ -33,6 +33,16 @@ then
     rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
     set +x
 
+    logtoboth "** $pfx Copying backports.list > sorces.list.d/"
+    set -x
+    rsync -av /etc/apt/sources.list.d/bullseye-backports.list /mnt/sdm/etc/apt/sources.list.d/
+    set +x
+
+    logtoboth "** $pfx Copying 90_backports > preferences.d/"
+    set -x
+    rsync -av /etc/apt/preferences.d/90_backports /mnt/sdm/etc/apt/preferences.d/
+    set +x
+
     logtoboth "** $pfx Copying .bash_aliases > home directory"
     set -x
     rsync -av /home/carl/.bash_aliases /mnt/sdm/home/carl/.bash_aliases
