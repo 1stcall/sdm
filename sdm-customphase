@@ -79,6 +79,7 @@ else
     set -x
     su carl --command="git config --global user.name \"Carl McAlwane\""
     su carl --command="git config --global user.email \"carlmcalwane@hotmail.co.uk\""
+    su carl --command="git config --global init.defaultBranch main"
     set +x
 
     logtoboth "** $pfx Cloning git repositories."
