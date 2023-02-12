@@ -1,53 +1,91 @@
 #!/usr/bin/env bash
 
-#[ $DEBUG -ge 1 ] && set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
-[ $DEBUG -ge 1 ] && set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
-[ $DEBUG -ge 3 ] && set -o nounset                                      # Treat unset variables as an error when substituting.
-#[ $DEBUG -ge 1 ] && set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
+[ $DEBUG -ge 1 ] && set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
+[ "$DEBUG" -ge 1 ] && set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
+[ "$DEBUG" -ge 1 ] && set -o nounset                                      # Treat unset variables as an error when substituting.
+[ "$DEBUG" -ge 1 ] && set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
 #[ $DEBUG -ge 2 ] && set -x                                               # Debugging
-#[ $DEBUG -ge 1 ] && export DEBUG
+[ $DEBUG -ge 1 ] && export DEBUG
                                                     # a non-zero status, or zero if no command exited with a non-zero status.
-declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev/sdm}
-declare baseImage               && baseImage=${baseImage:-2022-09-22-raspios-bullseye-arm64-lite.img}
-declare baseImageDirectory      && baseImageDirectory=${baseImageDirectory:-"baseos"}
-declare hostName                && hostName=${hostName:-"rpicm4-1"}
-declare baseUrl                 && baseUrl=${baseUrl:-"https://downloads.raspberrypi.org/"}
-declare downloadUrl
+declare -x baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev/sdm}
+declare -x baseImage               && baseImage=${baseImage:-2022-09-22-raspios-bullseye-arm64-lite.img}
+declare -x baseImageDirectory      && baseImageDirectory=${baseImageDirectory:-"baseos"}
+declare -x hostName                && hostName=${hostName:-"rpicm4-1"}
+declare -x baseUrl                 && baseUrl=${baseUrl:-"https://downloads.raspberrypi.org/"}
+declare -x downloadUrl
 declare -x logwidth             && logwidth=150
 
-source "${baseDirectory}/sdm-cparse"
+downloadUrl="$("${baseDirectory}"/get_lasest_pios.py ${baseUrl} raspios lite arm64 bullseye)"
+baseImage=$(echo ${downloadUrl} | sed 's:.*/::')
+baseImage=${baseImage::-3}
 
-downloadUrl="$("${baseDirectory}"/get_lasest_pios.py $baseUrl raspios lite arm64 bullseye)"
-logtoboth "downloadUrl=${downloadUrl}  baseDirectory=${baseDirectory} baseImage=${baseImage} baseImageDirectory=${baseImageDirectory} hostName=${hostName}"
+function fDebugLog() {
+    logLvl=${1:-99}             # Logging level to log message at.
+    logMsg="${2:-"NO MSG"}"       # Messge to log.
+    logWait="${3:-"nowait"}"      # wait="Press any key to continue."
+                                # yesno="Do you wish to continue (Y/N)?"
+                                # nowait=Don't wait.
+
+#    printf "logLvl=%s\nlogMsg=%s\nlogWait=%s\n" ${logLvl} ${logMsg} ${logWait}
+
+    if [ $logLvl -le $DEBUG ]; then
+        printf "[${logLvl}/${DEBUG}] %s\n" ${logMsg}
+        if [ "$logWait" == "wait" ]; then
+            printf "Press any key to continue...\n"
+            read -n 1 -s -r
+        elif [ "$logWait" == "yesno" ]; then
+            printf "Do you wish to continue? (Y/N)\n"
+            while true
+                do
+                    read -r -n 1 -s choice
+                    case "$choice" in
+                        n|N) exit 1;;
+                        y|Y) break;;
+                        *) echo 'Response not valid';;
+                    esac
+            done
+        fi
+    fi
+}
+
+IFS=''
+#printf "\n[$DEBUG] downloadUrl=%s\n    baseDirectory=%s\n    baseImageDirectory=%s\n    baseImage=%s\n    hostName=%s\n" ${downloadUrl} ${baseDirectory} ${baseImageDirectory} ${baseImage} ${hostName}
+fDebugLog 1 "downloadUrl=${downloadUrl}"
+fDebugLog 1 "baseDirectory=${baseDirectory}"
+fDebugLog 1 "baseImageDirectory=${baseImageDirectory}"
+fDebugLog 1 "baseImage=${baseImage}"
+fDebugLog 1 "hostName=${hostName}"
 
 if [ ! -d "${baseDirectory}/${baseImageDirectory}/" ] ; then
-    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Making directory ${baseDirectory}/${baseImageDirectory}/"
+    fDebugLog 1 "Making directory ${baseDirectory}/${baseImageDirectory}/"
     mkdir -pv "${baseDirectory}/${baseImageDirectory}/"
 else
-    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Skipping Making directory ${baseDirectory}/${baseImageDirectory}/"
+    fDebugLog 1 "Skipping Making directory ${baseDirectory}/${baseImageDirectory}/"
 fi
 
 if [ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ] ; then
-    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Downloading & extracting ${baseDirectory}"/"${baseImageDirectory}"/"${baseImage} to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
+    fDebugLog 0 "Downloading & extracting ${downloadUrl}"
+    fDebugLog 0 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}" yesno
     curlOps="" && [ "$DEBUG" -ge 2 ] && curlOps="--verbose"
     curl $curlOps $downloadUrl | unxz - > "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}"
 else
-    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Skipping Downloading & extracting $downloadUrl to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
+    fDebugLog 1 "Skipping Downloading & extracting $downloadUrl"
+    fDebugLog 1 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 fi
 
 if [ ! -d "${baseDirectory}/output/" ] ; then
-    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Making directory ${baseDirectory}/output/"
+    fDebugLog 1 "Making directory ${baseDirectory}/output/"
     mkdir -pv "${baseDirectory}/output/"
 else
-    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Skipping Making directory ${baseDirectory}/output/"
+    fDebugLog 1 "Skipping Making directory ${baseDirectory}/output/"
 fi
 
-[ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Syncing ${baseDirectory}/${baseImageDirectory}/${baseImage} to ${baseDirectory}/output/${hostName}.img"
+fDebugLog 1 "Syncing ${baseDirectory}/${baseImageDirectory}/${baseImage} to ${baseDirectory}/output/${hostName}.img"
 rsync -ah --progress "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}" "${baseDirectory}"/output/"${hostName}".img
 
-[ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Running ${baseDirectory}/sdm --customize"
+fDebugLog 0 "Running ${baseDirectory}/sdm --customize"
 "${baseDirectory}"/sdm --customize "${baseDirectory}"/output/"${hostName}".img \
-    --apps "zram-tools nmap tmux git command-not-found bash-completion gparted btrfs-progs systemd-container jq" \
+    --apps "zram-tools nmap tmux git command-not-found bash-completion gparted btrfs-progs systemd-container jq python3-pip" \
     --apt-dist-upgrade \
     --disable piwiz,swap \
     --dtoverlay i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host \
@@ -66,5 +104,7 @@ rsync -ah --progress "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}" "
     --fstab "${baseDirectory}"/my-fstab \
     --cscript "${baseDirectory}"/sdm-customphase
     
-[ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Running ${baseDirectory}/sdm --shrink ${baseDirectory}/output/${hostName}.img"
+fDebugLog 0 "Running ${baseDirectory}/sdm --shrink ${baseDirectory}/output/${hostName}.img" yesno
 "${baseDirectory}"/sdm --shrink "${baseDirectory}"/output/"${hostName}".img || true
+
+exit 0
