@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 #[ $DEBUG -ge 1 ] && set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
-#[ $DEBUG -ge 3 ] && set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
-#[ $DEBUG -ge 3 ] && set -o nounset                                      # Treat unset variables as an error when substituting.
+[ $DEBUG -ge 1 ] && set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
+[ $DEBUG -ge 3 ] && set -o nounset                                      # Treat unset variables as an error when substituting.
 #[ $DEBUG -ge 1 ] && set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
 #[ $DEBUG -ge 2 ] && set -x                                               # Debugging
 #[ $DEBUG -ge 1 ] && export DEBUG
@@ -11,13 +11,13 @@ declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev
 declare baseImage               && baseImage=${baseImage:-2022-09-22-raspios-bullseye-arm64-lite.img}
 declare baseImageDirectory      && baseImageDirectory=${baseImageDirectory:-"baseos"}
 declare hostName                && hostName=${hostName:-"rpicm4-1"}
-declare downloadUrl             && downloadUrl="$("${baseDirectory}"/get_lasest_pios.py https://downloads.raspberrypi.org/ raspios full arm64 bullseye)"
-
-declare -x logwidth
-logwidth=150
+declare baseUrl                 && baseUrl=${baseUrl:-"https://downloads.raspberrypi.org/"}
+declare downloadUrl
+declare -x logwidth             && logwidth=150
 
 source "${baseDirectory}/sdm-cparse"
 
+downloadUrl="$("${baseDirectory}"/get_lasest_pios.py $baseUrl raspios lite arm64 bullseye)"
 logtoboth "downloadUrl=${downloadUrl}  baseDirectory=${baseDirectory} baseImage=${baseImage} baseImageDirectory=${baseImageDirectory} hostName=${hostName}"
 
 if [ ! -d "${baseDirectory}/${baseImageDirectory}/" ] ; then
@@ -28,11 +28,11 @@ else
 fi
 
 if [ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ] ; then
-    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Downloading & extracting https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-09-26/${baseImage}.xz to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
-    curlOps="" && [ "$DEBUG" -ge 3 ] && curlOps="--verbose"
-    curl $curlOps https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-09-26/"${baseImage}".xz | unxz - > "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}"
+    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Downloading & extracting ${baseDirectory}"/"${baseImageDirectory}"/"${baseImage} to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
+    curlOps="" && [ "$DEBUG" -ge 2 ] && curlOps="--verbose"
+    curl $curlOps $downloadUrl | unxz - > "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}"
 else
-    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Skipping Downloading & extracting https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2022-09-26/${baseImage}.xz to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
+    [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Skipping Downloading & extracting $downloadUrl to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 fi
 
 if [ ! -d "${baseDirectory}/output/" ] ; then
@@ -61,10 +61,10 @@ rsync -ah --progress "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}" "
     --user carl \
     --wpa /etc/wpa_supplicant/wpa_supplicant.conf \
     --extend \
-    --xmb 2049 \
+    --xmb 3073 \
     --batch \
     --fstab "${baseDirectory}"/my-fstab \
     --cscript "${baseDirectory}"/sdm-customphase
     
 [ "$DEBUG" -ge 1 ] && logtoboth "[DEBUG=$DEBUG] Running ${baseDirectory}/sdm --shrink ${baseDirectory}/output/${hostName}.img"
-"${baseDirectory}"/sdm --shrink "${baseDirectory}"/output/"${hostName}".img
+"${baseDirectory}"/sdm --shrink "${baseDirectory}"/output/"${hostName}".img || true

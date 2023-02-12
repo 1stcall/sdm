@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 lenarg2=len(sys.argv[2])
 lenarg3=len(sys.argv[3])
 lenarg4=len(sys.argv[4])
-lenarg5=len(sys.argv[5])
+#lenarg5=len(sys.argv[5])
 
 url = f"{sys.argv[1]}{sys.argv[2]}_{sys.argv[3]}_{sys.argv[4]}/images/"
 
