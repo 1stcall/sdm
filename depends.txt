@@ -1,0 +1,6 @@
+unxz
+curl
+xz-utils
+rsync
+parted
+file

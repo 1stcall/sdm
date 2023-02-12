@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+set -x                                              # Debugging
 set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
 set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
 set -o nounset                                      # Treat unset variables as an error when substituting.
