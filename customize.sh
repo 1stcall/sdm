@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-[ $DEBUG -ge 1 ] && set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
+[ "$DEBUG" -ge 1 ] && set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
 [ "$DEBUG" -ge 1 ] && set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
 [ "$DEBUG" -ge 1 ] && set -o nounset                                      # Treat unset variables as an error when substituting.
 [ "$DEBUG" -ge 1 ] && set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
