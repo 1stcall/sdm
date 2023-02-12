@@ -1,9 +1,9 @@
 #!/bin/bash
 
-set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
-set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
-set -o nounset                                      # Treat unset variables as an error when substituting.
-set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
+#set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
+#set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
+#set -o nounset                                      # Treat unset variables as an error when substituting.
+#set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
 
 #
 # Sample sdm Custom Phase script
@@ -128,7 +128,7 @@ else
     apt-get remove --purge --yes triggerhappy
     set +x
 
-    read -n 1 -s -r -p "Press any key to continue..."
+    read -n 1 -s -r -p "Press any key to continue...\n"
 
     # END Your Custom Phase post-install code here
 

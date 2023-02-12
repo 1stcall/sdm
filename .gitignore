@@ -1,3 +1,4 @@
 baseos/*
 output/*
+*.log
 *.out
