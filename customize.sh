@@ -85,7 +85,7 @@ rsync -ah --progress "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}" "
 
 fDebugLog 0 "Running ${baseDirectory}/sdm --customize"
 "${baseDirectory}"/sdm --customize "${baseDirectory}"/output/"${hostName}".img \
-    --apps "zram-tools nmap tmux git command-not-found bash-completion gparted btrfs-progs systemd-container jq python3-pip" \
+    --apps "zram-tools nmap tmux git command-not-found bash-completion gparted btrfs-progs systemd-container jq python3-pip shellcheck" \
     --apt-dist-upgrade \
     --disable piwiz,swap \
     --dtoverlay i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host \
