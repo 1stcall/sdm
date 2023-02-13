@@ -49,7 +49,6 @@ function fDebugLog() {
 }
 
 IFS=''
-#printf "\n[$DEBUG] downloadUrl=%s\n    baseDirectory=%s\n    baseImageDirectory=%s\n    baseImage=%s\n    hostName=%s\n" ${downloadUrl} ${baseDirectory} ${baseImageDirectory} ${baseImage} ${hostName}
 fDebugLog 1 "downloadUrl=${downloadUrl}"
 fDebugLog 1 "baseDirectory=${baseDirectory}"
 fDebugLog 1 "baseImageDirectory=${baseImageDirectory}"
