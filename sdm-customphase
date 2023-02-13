@@ -30,22 +30,31 @@ then
 # INSERT Your Custom Phase 0 code here
 
     logtoboth "** $pfx Creating directory bluetooth.service.d/" 
-    mkdir -pv /mnt/sdm/etc/systemd/system/bluetooth.service.d/
+    mkdir -pv $SDMPT/etc/systemd/system/bluetooth.service.d/
 
     logtoboth "** $pfx Copying override.conf > bluetooth.service.d/"
-    rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
+    rsync -av /etc/systemd/system/bluetooth.service.d/override.conf $SDMPT/etc/systemd/system/bluetooth.service.d/override.conf
 
     logtoboth "** $pfx Copying backports.list > sorces.list.d/"
-    rsync -av /etc/apt/sources.list.d/bullseye-backports.list /mnt/sdm/etc/apt/sources.list.d/
+    rsync -av /etc/apt/sources.list.d/bullseye-backports.list $SDMPT/etc/apt/sources.list.d/
 
     logtoboth "** $pfx Copying 90_backports > preferences.d/"
-    rsync -av /etc/apt/preferences.d/90_backports /mnt/sdm/etc/apt/preferences.d/
+    rsync -av /etc/apt/preferences.d/90_backports $SDMPT/etc/apt/preferences.d/
 
     logtoboth "** $pfx Copying .bash_aliases > home directory"
-    rsync -av /home/carl/.bash_aliases /mnt/sdm/home/carl/.bash_aliases
+    rsync -av /home/carl/.bash_aliases $SDMPT/home/carl/
+
+    logtoboth "** $pfx Copying .bashrc > home directory"
+    rsync -av /home/carl/.bashrc $SDMPT/home/carl/
 
     logtoboth "** $pfx Creating directory ~/dev/"
-    mkdir -vp /mnt/sdm/home/carl/dev/
+    mkdir -vp $SDMPT/home/carl/dev/
+
+    logtoboth "** $pfx Creating directory ~/.ssh/"
+    mkdir -vp $SDMPT/home/carl/.ssh/
+
+    logtoboth "** $pfx Copying .ssh/ > home directory"
+    rsync -av /home/carl/.ssh/{authorized_keys,known_hosts} $SDMPT/home/carl/.ssh/
 
 # END Your Custom Phase 0 code here
 
