@@ -30,34 +30,22 @@ then
 # INSERT Your Custom Phase 0 code here
 
     logtoboth "** $pfx Creating directory bluetooth.service.d/" 
-    set -x
     mkdir -pv /mnt/sdm/etc/systemd/system/bluetooth.service.d/
-    set +x
 
     logtoboth "** $pfx Copying override.conf > bluetooth.service.d/"
-    set -x
     rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
-    set +x
 
     logtoboth "** $pfx Copying backports.list > sorces.list.d/"
-    set -x
     rsync -av /etc/apt/sources.list.d/bullseye-backports.list /mnt/sdm/etc/apt/sources.list.d/
-    set +x
 
     logtoboth "** $pfx Copying 90_backports > preferences.d/"
-    set -x
     rsync -av /etc/apt/preferences.d/90_backports /mnt/sdm/etc/apt/preferences.d/
-    set +x
 
     logtoboth "** $pfx Copying .bash_aliases > home directory"
-    set -x
     rsync -av /home/carl/.bash_aliases /mnt/sdm/home/carl/.bash_aliases
-    set +x
 
     logtoboth "** $pfx Creating directory ~/dev/"
-    set -x
     mkdir -vp /mnt/sdm/home/carl/dev/
-    set +x
 
 # END Your Custom Phase 0 code here
 
@@ -92,14 +80,11 @@ else
     #
     
     logtoboth "** $pfx Configuring git."
-    set -x
     su carl --command="git config --global user.name \"Carl McAlwane\""
     su carl --command="git config --global user.email \"carlmcalwane@hotmail.co.uk\""
     su carl --command="git config --global init.defaultBranch main"
-    set +x
 
     logtoboth "** $pfx Cloning git repositories."
-    set -x
     su carl --command="git clone https://github.com/1stcall/sdm.git ~/dev/sdm/"
     su carl --command="git clone https://github.com/1stcall/storagetoolkit.git ~/dev/storagetoolkit/"
     su carl --command="git clone https://github.com/1stcall/build-kernel.git ~/dev/build-kernel/"
@@ -114,19 +99,17 @@ else
     su carl --command="git clone https://github.com/1stcall/utils.git ~/dev/utils/"
     su carl --command="git clone https://github.com/1stcall/homepage.git ~/dev/homepage/"
 #    su carl --command="git clone https://github.com/1stcall/net-boot.git ~/dev/net-boot/"
- #   su carl --command="git clone https://github.com/1stcall/mydotfiles.git ~/dev/mydotfiles/"
+#    su carl --command="git clone https://github.com/1stcall/mydotfiles.git ~/dev/mydotfiles/"
     su carl --command="git clone https://github.com/1stcall/1stcall.github.io.git  ~/dev/1stcall.github.io/"
-    set +x
 
     logtoboth "** $pfx Runng apt-get update."
-    set -x
     apt-get update
-    set +x
 
     logtoboth "** $pfx Removing triggerhappy"
-    set -x
     apt-get remove --purge --yes triggerhappy
-    set +x
+
+    logtoboth "** $pfx Installing BeautifulSoup4"
+    pip install bs4
 
     #read -n 1 -s -r -p "Press any key to continue...\n"
 
