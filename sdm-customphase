@@ -1,10 +1,4 @@
 #!/bin/bash
-
-#set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
-#set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
-#set -o nounset                                      # Treat unset variables as an error when substituting.
-#set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
-
 #
 # Sample sdm Custom Phase script
 #
@@ -18,49 +12,17 @@ function loadparams() {
 #
 phase=$1
 pfx="$(basename $0)"     #For messages
+loadparams
 
 if [ $phase == "0" ]
 then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    loadparams
     logtoboth "* $pfx Phase 0"
 
 # INSERT Your Custom Phase 0 code here
-
-    logtoboth "** $pfx Creating directory bluetooth.service.d/" 
-    set -x
-    mkdir -pv /mnt/sdm/etc/systemd/system/bluetooth.service.d/
-    set +x
-
-    logtoboth "** $pfx Copying override.conf > bluetooth.service.d/"
-    set -x
-    rsync -av /etc/systemd/system/bluetooth.service.d/override.conf /mnt/sdm/etc/systemd/system/bluetooth.service.d/override.conf
-    set +x
-
-    logtoboth "** $pfx Copying backports.list > sorces.list.d/"
-    set -x
-    rsync -av /etc/apt/sources.list.d/bullseye-backports.list /mnt/sdm/etc/apt/sources.list.d/
-    set +x
-
-    logtoboth "** $pfx Copying 90_backports > preferences.d/"
-    set -x
-    rsync -av /etc/apt/preferences.d/90_backports /mnt/sdm/etc/apt/preferences.d/
-    set +x
-
-    logtoboth "** $pfx Copying .bash_aliases > home directory"
-    set -x
-    rsync -av /home/carl/.bash_aliases /mnt/sdm/home/carl/.bash_aliases
-    set +x
-
-    logtoboth "** $pfx Creating directory ~/dev/"
-    set -x
-    mkdir -vp /mnt/sdm/home/carl/dev/
-    set +x
-
-# END Your Custom Phase 0 code here
-
+    
     logtoboth "* $pfx Phase 0 Completed"
 
 elif [ "$phase" == "1" ]
@@ -68,69 +30,24 @@ then
     #
     # Phase 1 (in nspawn)
     #
-    loadparams
     logtoboth "* $pfx Phase 1"
     logfreespace "at start of $pfx Phase 1"
     #
     # INSERT your Custom Phase 1 customization stuff here
     # In Phase 1 all references to directories in the image can be direct
     #
-    # END your Custom Phase 1 customization stuff here
     logfreespace "at end of $pfx Phase 1"
     logtoboth "* $pfx Phase 1 Completed"
 else
     #
     # Post-install edits
     #
-    loadparams
-    logtoboth "*. $pfx Custom Phase post-install"
+    logtoboth "* $pfx Custom Phase post-install"
     logfreespace "at start of $pfx Custom Phase post-install"
-    
     #
     # INSERT Your Custom Phase post-install code here
     # In Phase post-install all references to directories in the image can be direct
     #
-    
-    logtoboth "** $pfx Configuring git."
-    set -x
-    su carl --command="git config --global user.name \"Carl McAlwane\""
-    su carl --command="git config --global user.email \"carlmcalwane@hotmail.co.uk\""
-    su carl --command="git config --global init.defaultBranch main"
-    set +x
-
-    logtoboth "** $pfx Cloning git repositories."
-    set -x
-    su carl --command="git clone https://github.com/1stcall/sdm.git ~/dev/sdm/"
-    su carl --command="git clone https://github.com/1stcall/storagetoolkit.git ~/dev/storagetoolkit/"
-    su carl --command="git clone https://github.com/1stcall/build-kernel.git ~/dev/build-kernel/"
-    su carl --command="git clone https://github.com/1stcall/pi-gen.git ~/dev/pi-gen/"
-    su carl --command="git clone https://github.com/1stcall/docker-stack-1stcall.uk.git ~/dev/docker-stack-1stcall.uk/"
-    su carl --command="git clone https://github.com/1stcall/1stcall.uk-technitium-dns-server.git ~/dev/1stcall.uk-technitium-dns-server/"
-    su carl --command="git clone https://github.com/1stcall/aptly.git ~/dev/aptly/"
-    su carl --command="git clone https://github.com/1stcall/autoAP.git ~/dev/autoAP"
-    su carl --command="git clone https://github.com/1stcall/raspinfo.git ~/dev/raspinfo/"
-    su carl --command="git clone https://github.com/1stcall/usbboot.git ~/dev/usbboot/"
-    su carl --command="git clone https://github.com/1stcall/dotfiles.git ~/dev/dotfiles/"
-    su carl --command="git clone https://github.com/1stcall/utils.git ~/dev/utils/"
-    su carl --command="git clone https://github.com/1stcall/homepage.git ~/dev/homepage/"
-    su carl --command="git clone https://github.com/1stcall/net-boot.git ~/dev/net-boot/"
-    su carl --command="git clone https://github.com/1stcall/mydotfiles.git ~/dev/mydotfiles/"
-    su carl --command="git clone https://github.com/1stcall/1stcall.github.io.git  ~/dev/1stcall.github.io/"
-    set +x
-
-    logtoboth "** $pfx Runng apt-get update."
-    set -x
-    apt-get update
-    set +x
-
-    logtoboth "** $pfx Removing triggerhappy"
-    set -x
-    apt-get remove --purge --yes triggerhappy
-    set +x
-
-    read -n 1 -s -r -p "Press any key to continue...\n"
-
-    # END Your Custom Phase post-install code here
 
     logfreespace "at end of $pfx Custom Phase post-install"
     logtoboth "* $pfx Custom Phase post-install Completed"
