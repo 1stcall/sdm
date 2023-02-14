@@ -1,5 +1,22 @@
 # Changelog
 
+## V7.9
+
+* Wiki documentation updated and completely moved to this github Docs/ directory. Wiki will be removed soon
+* Add --nopassword to fully disable password processing during customize
+* Add `--rename-pi newuser` to rename the 'pi' user during customization
+* New plugins
+  * **btwifiset**: Set WiFi SSID/password via Bluetooth
+  * **imon**: Install internet up/down, External IP, and Failover monitor
+  * **pistrong**: Install strongSwan IPSEC VPN and pistrong Cert Manager
+* General code improvements
+
+## V7.8
+
+* Correct V7.7.1 chroot fix
+* Ensure pre-phase0 and burn logging contain all messages
+* Don't try to process `--user` in burn if it's already added
+
 ## V7.7.1
 
 * unset/restore SDMPT around chroot
