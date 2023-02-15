@@ -116,7 +116,7 @@ function islooped() {
     local fn=$(realpath $1) fl=1
     while read line
     do
-        [[ "$line" =~ "$fn" ]] && fl=0
+        [[ "$line" = "$fn" ]] && fl=0
     done < <(losetup -a)
 
     return $fl
