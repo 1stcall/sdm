@@ -1,6 +1,36 @@
 #!/usr/bin/env bash
 #
 set -e
+declare RESTORE=$(echo -en '\033[0m')
+declare RED=$(echo -en '\033[00;31m')
+declare GREEN=$(echo -en '\033[00;32m')
+declare YELLOW=$(echo -en '\033[00;33m')
+declare BLUE=$(echo -en '\033[00;34m')
+declare MAGENTA=$(echo -en '\033[00;35m')
+declare PURPLE=$(echo -en '\033[00;35m')
+declare CYAN=$(echo -en '\033[00;36m')
+declare LIGHTGRAY=$(echo -en '\033[00;37m')
+declare LRED=$(echo -en '\033[01;31m')
+declare LGREEN=$(echo -en '\033[01;32m')
+declare LYELLOW=$(echo -en '\033[01;33m')
+declare LBLUE=$(echo -en '\033[01;34m')
+declare LMAGENTA=$(echo -en '\033[01;35m')
+declare LPURPLE=$(echo -en '\033[01;35m')
+declare LCYAN=$(echo -en '\033[01;36m')
+declare WHITE=$(echo -en '\033[01;37m')
+declare scriptName=$(basename -- "${0}")
+declare LOGPREFIX=${LOGPREFIX:-${scriptName}}
+#
+declare -rx callingUser=$(who am i | awk '{print $1}')
+#
+function fRunAs(){
+    local slCmdToRun="${1:-:}"
+    local slUserToRunAs="${2:-${callingUser}}"
+    printf "Running command ${slCmdToRun}    As ${slUserToRunAs}\n" 1>&2
+    su ${callingUser} --command="${slCmdToRun}"
+    return ${!}
+}
+declare -fx fRunAs
 #
 debug(){
     while read line
@@ -9,13 +39,13 @@ debug(){
     done
 }
 export debug
-
+#
 log(){
     LOGMG="${1}"
-    printf "${GREEN}%s %s${RESTORE} ${LCYAN}%s : ${LBLUE}%s${RESTORE}\n" $(date +'%Y/%m/%d %T') ${LOGPREFIX} "${LOGMG}" | tee -a "${logname}"
+    printf "${GREEN}%s %s${RESTORE} ${LCYAN}%s : ${LBLUE}%s${RESTORE}\n" $(date +'%Y/%m/%d %T') ${LOGPREFIX} "${LOGMG}" | tee -a ${logname}
 }
 export log
-
+#
 function displaytime {
   local T="${1}"
   local D=$((T/60/60/24))

@@ -9,49 +9,17 @@ DEBUG=${DEBUG:-0}
 [ "$DEBUG" -ge 10 ] && set -x                                               # Debugging
 [ "$DEBUG" -ge 1 ]  && export DEBUG
 #
-source common.sh
-#
-function fDebugLog() {
-    OLDIFS=${IFS}
-    IFS=''
-    pfx="*DBG ${scriptName}:"
-    logLvl=${1:-99}             # Logging level to log message at.
-    logMsg="${2:-"NO MSG"}"     # Messge to log.
-    logWait="${3:-"nowait"}"    # wait="Press any key to continue."
-                                # yesno="Do you wish to continue (Y/N)?"
-                                # nowait=Don't wait.
-    minDebugWait=${4:-5}        # Minimug debug level to wait for keypress.
-
-    if [ $logLvl -le $DEBUG ]; then
-        log "$pfx [${logLvl}/${DEBUG}] ${logMsg}" 1>&2
-        if [ "$logWait" == "wait" ] && [ "$DEBUG" -ge ${minDebugWait} ]; then
-            log "$pfx Press any key to continue..." 1>&2
-            read -n 1 -s -r
-        elif [ "$logWait" == "yesno" ]; then
-            log "$pfx Do you wish to continue? (Y/N)" 1>&2
-            while true
-                do
-                    read -r -n 1 -s choice
-                    case "$choice" in
-                        n|N) exit 1;;
-                        y|Y) break;;
-                        *) log "Response not valid"  1>&2 ;;
-                    esac
-            done
-        fi
-    fi
-    IFS=${OLDIFS}
-}
-export fDebugLog
-
-function errexit() {
-    echo -e "$1" 1>&2
-    exit 1
-}
-export errexit
-
-scriptName=`basename "$(realpath $0)"`
-#source common.sh
+SOURCE=${BASH_SOURCE[0]}
+while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  SOURCE=$(readlink "$SOURCE")
+  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+baseDir=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+scriptName=`basename "$(realpath ${BASH_SOURCE[0]})"`
+source "${baseDir}/common.sh"
+logname="${baseDir}scriptName.log"
+export logname
 
 function printhelp() {
     echo $"${scriptName} $version

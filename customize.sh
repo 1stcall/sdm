@@ -19,34 +19,22 @@ declare downloadUrl
 declare STARTBUILD=$(date)
 declare STARTSEC=$(date +%s)
 declare ENDBUILD=""
-declare RESTORE=$(echo -en '\033[0m')
-declare RED=$(echo -en '\033[00;31m')
-declare GREEN=$(echo -en '\033[00;32m')
-declare YELLOW=$(echo -en '\033[00;33m')
-declare BLUE=$(echo -en '\033[00;34m')
-declare MAGENTA=$(echo -en '\033[00;35m')
-declare PURPLE=$(echo -en '\033[00;35m')
-declare CYAN=$(echo -en '\033[00;36m')
-declare LIGHTGRAY=$(echo -en '\033[00;37m')
-declare LRED=$(echo -en '\033[01;31m')
-declare LGREEN=$(echo -en '\033[01;32m')
-declare LYELLOW=$(echo -en '\033[01;33m')
-declare LBLUE=$(echo -en '\033[01;34m')
-declare LMAGENTA=$(echo -en '\033[01;35m')
-declare LPURPLE=$(echo -en '\033[01;35m')
-declare LCYAN=$(echo -en '\033[01;36m')
-declare WHITE=$(echo -en '\033[01;37m')
-declare scriptName=$(basename -- "${0}")
-declare LOGPREFIX=${LOGPREFIX:-${scriptName}}
-
-callingUser=$(who am i | awk '{print $1}')
-downloadUrl=$(su ${callingUser} --command "${baseDirectory}/get_latest_pios.sh -t")
+#
+SOURCE=${BASH_SOURCE[0]}
+while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  SOURCE=$(readlink "$SOURCE")
+  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+baseDir=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+scriptName=`basename "$(realpath ${BASH_SOURCE[0]})"`
+source "${baseDir}/common.sh"
+logname="${baseDir}/${scriptName}.log"
+export logname
+downloadUrl=$("${baseDirectory}/get_latest_pios.sh -t")
 baseImage=$(echo ${downloadUrl} | sed 's:.*/::')
 baseImage=${baseImage::-3}
 
-source common.sh
-
-IFS=''
 fDebugLog 1 "callingUser=${callingUser}"
 fDebugLog 1 "downloadUrl=${downloadUrl}"
 fDebugLog 1 "baseDirectory=${baseDirectory}"
@@ -108,7 +96,7 @@ fDebugLog 0 "Running ${baseDirectory}/sdm --customize"
     --extend \
     --xmb 1024 \
     --poptions apps \
-    --apps "zram-tools command-not-found bash-completion tmux systemd-container" \
+    --apps "zram-tools command-not-found bash-completion tmux systemd-container apt-transport-https" \
     --rename-pi carl \
     --password-pi letmein123 \
     --custom1=$DEBUG
