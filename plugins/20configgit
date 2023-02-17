@@ -3,18 +3,14 @@
 # This is an sdm plugin for: configgit.  This configures my git environment.
 #
 # The plugin is called three times: for Phase 0, Phase 1, and post-install.
-#
-
-function loadparams() {
-    source $SDMPT/etc/sdm/sdm-readparams
-}
-
 # $1 is the phase: "0", "1", or "post-install"
 # $2 is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
 #
 # Main code for the Plugin
 #
-loadparams && DEBUG=${custom1:-0}
+source $SDMPT/etc/sdm/sdm-readparams 
+#
+DEBUG=${custom1:-0}
 phase=$1
 pfx="$(basename $0)"     #For messages
 args="$2"
@@ -29,30 +25,30 @@ then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 0 "* Plugin $pfx. DEBUG $DEBUG: Start Phase 0"
+    fDebugLog 0 "* Plugin $pfx: Start Phase 0"
     #
-    fDebugLog 2 "* Plugin $pfx. DEBUG $DEBUG: Nothing to do"
+    fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
-    fDebugLog 0 "* Plugin $pfx. DEBUG $DEBUG: Complete Phase 0" wait
+    fDebugLog 0 "* Plugin $pfx: Complete Phase 0" wait
 
 elif [ "$phase" == "1" ]
 then
     #
     # Phase 1 (in nspawn)
     #
-    fDebugLog 0 "* Plugin $pfx. DEBUG $DEBUG: Start Phase 1"
+    fDebugLog 0 "* Plugin $pfx: Start Phase 1 (in nspawn)"
     logfreespace "at start of Plugin $pfx Phase 1"
     #
     fDebugLog 1 "> Plugin $pfx: Installing git"
     doaptrpterror "install --no-install-recommends -y git" "${showapt}"
     #
     logfreespace "at end of $pfx Phase 1"
-    fDebugLog 0 "* Plugin $pfx. DEBUG $DEBUG: Complete Phase 1" wait
+    fDebugLog 0 "* Plugin $pfx: Complete Phase 1" wait
 else
     #
     # Plugin Post-install edits
     #
-    fDebugLog 0 "* Plugin $pfx. DEBUG $DEBUG: Start Phase post-install"
+    fDebugLog 0 "* Plugin $pfx: Start Phase post-install"
     #
     # Print the keys found (example usage). plugin_getargs returns the list of found keys in $foundkeys
     #
@@ -60,11 +56,11 @@ else
     plugin_printkeys
     #logfreespace "at start of Plugin $pfx Phase post-install"
     #
-    fDebugLog 1 "* Plugin $pfx. DEBUG $DEBUG: Configuring git."
+    fDebugLog 1 "* Plugin $pfx: Configuring git."
     su $myuser --command="git config --global user.name \"Carl McAlwane\""
     su $myuser --command="git config --global user.email \"carlmcalwane@hotmail.co.uk\""
     su $myuser --command="git config --global init.defaultBranch main"
     #
     #logfreespace "at end of $pfx Custom Phase post-install"
-    logtoboth "* Plugin $pfx. DEBUG $DEBUG: Complete Phase post-install" wait
+    logtoboth "* Plugin $pfx: Complete Phase post-install" wait
 fi

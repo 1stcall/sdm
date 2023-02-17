@@ -3,58 +3,99 @@
 # This is an sdm plugin for: pxehost.  This configures my git environment.
 #
 # The plugin is called three times: for Phase 0, Phase 1, and post-install.
-#
-function loadparams() {
-    source $SDMPT/etc/sdm/sdm-readparams
-}
 # $1 is the phase: "0", "1", or "post-install"
 # $2 is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
 #
 # Main code for the Plugin
 #
-loadparams && DEBUG=${custom1:-0}
+source $SDMPT/etc/sdm/sdm-readparams
+#
+DEBUG=${custom1:-0}
 phase=$1
 pfx="$(basename $0)"     #For messages
 args="$2"
-
+#
+plugin_getargs $pfx "$args" "|netIface|ipAddr|dnsaddr|brdAddr|gwAddr|dhcpRange|tftpRootDir|nfsRootDir|"
+[ -f $SDMPT/etc/sdm/assets/common.sh ] || cp -va $assetDir/common.sh $SDMPT/etc/sdm/assets/common.sh
+source $SDMPT/etc/sdm/assets/common.sh
+fDebugLog 3 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/assets/common.sh" wait
+#
 if [ "$phase" == "0" ]
 then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    logtoboth "* Plugin $pfx. DEBUG $DEBUG: Start Phase 0"
-    [ $DEBUG -ge 5 ] && logtoboth "* Plugin $pfx. DEBUG $DEBUG: Press any key to continue..." && read -n 1 -s -r
-    logtoboth "* Plugin $pfx. DEBUG $DEBUG: Complete Phase 0"
+    fDebugLog 0 "* Plugin $pfx: Start Phase 0"
+    fDebugLog 2 "$(plugin_printkeys)"
+    #
+    fDebugLog 1 "* Plugin $pfx: Nothing to do"
+    #
+    fDebugLog 0 "* Plugin $pfx: Complete Phase 0" wait
     #
 elif [ "$phase" == "1" ]
 then
     #
     # Phase 1 (in nspawn)
     #
-    plugin_getargs $pfx "$args" "|netIface|ipAddr|dnsaddr|brdAddr|gwAddr|dhcpRange|tftpRootDir|nfsRootDir!"
-    plugin_printkeys
-
-    logtoboth "* Plugin $pfx. DEBUG $DEBUG: Start Phase 1"
-    logfreespace "at start of Plugin $pfx Phase 1"
+    fDebugLog 0 "* Plugin $pfx: Start Phase 1 (in nspawn)"
+    fDebugLog 2 "$(plugin_printkeys)"
     #
-    logtoboth "> Plugin $pfx: Install dnsmasq & nfs-kernel-server"
+    fDebugLog 2 $(logfreespace "at start of Plugin $pfx Phase 1")
+    #
+    fDebugLog 1 "> Plugin $pfx: Install dnsmasq, nfs-kernel-server & systemd-resolved"
+    #doaptrpterror "install --no-install-recommends -y dnsmasq nfs-kernel-server systemd-resolved" "${showapt}"
     doaptrpterror "install --no-install-recommends -y dnsmasq nfs-kernel-server" "${showapt}"
     #
-    logfreespace "at end of $pfx Phase 1"
+    fDebugLog 2 $(logfreespace "at end of $pfx Phase 1")
     #
-    [ $DEBUG -ge 5 ] && logtoboth "* Plugin $pfx. DEBUG $DEBUG: Press any key to continue..." && read -n 1 -s -r
-    logtoboth "* Plugin $pfx. DEBUG $DEBUG: Complete Phase 1"
+    fDebugLog 0 "* Plugin $pfx: Complete Phase 1" wait
+    #
 else
     #
     # Plugin Post-install edits
     #
-    logtoboth "* Plugin $pfx. DEBUG $DEBUG: Start Phase post-install"
+    fDebugLog 0 "* Plugin $pfx: Start Phase post-install"
     #
-    # Print the keys found (example usage). plugin_getargs returns the list of found keys in $foundkeys
+    fDebugLog 1 "> Plugin $pfx: blocking interface ${netIface} from dhcpcd" 
+    echo "denyinterfaces pattern ${netIface}" | tee -a $SDMPT/etc/dhcpcd.conf
     #
-    #logfreespace "at start of Plugin $pfx Phase post-install"
+    fDebugLog 1 "> Plugin $pfx: Configuring dnsmasq"
+    cat <<EOF | tee $SDMPT/etc/dnsmasq.conf
+interface=${netIface}
+port=0
+dhcp-range=${dhcpRange}
+log-dhcp
+enable-tftp
+tftp-root=${tftpRootDir}
+pxe-service=0,"Raspberry Pi Boot"
+EOF
     #
-    #logfreespace "at end of $pfx Custom Phase post-install"
-    [ $DEBUG -ge 5 ] && logtoboth "* Plugin $pfx. DEBUG $DEBUG: Press any key to continue..." && read -n 1 -s -r
-    logtoboth "* Plugin $pfx. DEBUG $DEBUG: Complete Phase post-install"
+    fDebugLog 1 "> Plugin $pfx: Configuring systemd-networkd"
+    cat <<EOF | tee $SDMPT/etc/systemd/network/10-${netIface}.netdev
+[Match]
+Name=${netIface}
+
+[Network]
+DHCP=no
+EOF
+    #
+    cat <<EOF | tee $SDMPT/etc/systemd/network/11-${netIface}.network
+[Match]
+Name=${netIface}
+
+[Network]
+Address=${ipAddr}
+DNS=${dnsaddr}
+
+[Route]
+Gateway=${gwAddr}
+EOF
+    #
+#    fDebugLog 1 "> Plugin $pfx: Installing systemd-resolved"
+#    doaptrpterror "install --no-install-recommends -y systemd-resolved" "${showapt}"
+    #fDebugLog 1 "> Plugin $pfx: Configuring systemd-resolved"
+    #sed -i "s|^#DNS=$|DNS=${dnsaddr}|" /etc/systemd/resolved.conf
+    #
+    fDebugLog 0 "* Plugin $pfx: Complete Phase post-install" wait
+    #
 fi

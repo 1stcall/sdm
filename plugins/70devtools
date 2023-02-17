@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# This is an sdm plugin for: devtools.  This installs some tools.
+#
+# The plugin is called three times: for Phase 0, Phase 1, and post-install.
+# $1 is the phase: "0", "1", or "post-install"
+# $2 is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+#
+# Main code for the Plugin
+#
+source $SDMPT/etc/sdm/sdm-readparams
+#
+DEBUG=${custom1:-0}
+phase=$1
+pfx="$(basename $0)"     #For messages
+args="$2"
+#
+plugin_getargs $pfx "$args"
+[ -f $SDMPT/etc/sdm/assets/common.sh ] || cp -va $assetDir/common.sh $SDMPT/etc/sdm/assets/common.sh
+source $SDMPT/etc/sdm/assets/common.sh
+fDebugLog 3 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/assets/common.sh" wait
+#
+if [ "$phase" == "0" ]
+then
+    #
+    # In Phase 0 all references to directories in the image must be preceded by $SDMPT
+    #
+    fDebugLog 0 "* Plugin $pfx: Start Phase 0"
+#    fDebugLog 2 "$(plugin_printkeys)"
+    #
+    fDebugLog 1 "* Plugin $pfx: Nothing to do"
+    #
+    fDebugLog 0 "* Plugin $pfx: Complete Phase 0" wait
+    #
+elif [ "$phase" == "1" ]
+then
+    #
+    # Phase 1 (in nspawn)
+    #
+    fDebugLog 0 "* Plugin $pfx: Start Phase 1 (in nspawn)"
+#    fDebugLog 2 "$(plugin_printkeys)"
+    #
+    fDebugLog 2 $(logfreespace "at start of Plugin $pfx Phase 1")
+    #
+    fDebugLog 1 "> Plugin $pfx: Install tailscale repo and gpg key."
+    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.noarmor.gpg | sudo tee $SDMPT/usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.tailscale-keyring.list | sudo tee $SDMPT/etc/apt/sources.list.d/tailscale.list
+    apt-get update
+    #
+    fDebugLog 1 "> Plugin $pfx: Install nmap, tcpdump, tailscale, gparted"
+    doaptrpterror "install --no-install-recommends -y nmap tcpdump gparted" "${showapt}"
+    #
+    fDebugLog 2 $(logfreespace "at end of $pfx Phase 1")
+    #
+    fDebugLog 0 "* Plugin $pfx: Complete Phase 1" wait 4
+    #
+else
+    #
+    # Plugin Post-install edits
+    #
+    fDebugLog 0 "* Plugin $pfx: Start Phase post-install"
+    #
+    fDebugLog 1 "> Plugin $pfx: Installing systemd-resolved"
+    doaptrpterror "install --no-install-recommends -y systemd-resolved" "${showapt}"
+    #fDebugLog 1 "> Plugin $pfx: Configuring systemd-resolved"
+    #sed -i "s|^#DNS=$|DNS=${dnsaddr}|" /etc/systemd/resolved.conf
+    #
+    fDebugLog 0 "* Plugin $pfx: Complete Phase post-install" wait 4
+    #
+fi

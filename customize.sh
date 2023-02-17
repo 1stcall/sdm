@@ -31,7 +31,7 @@ scriptName=`basename "$(realpath ${BASH_SOURCE[0]})"`
 source "${baseDir}/common.sh"
 logname="${baseDir}/${scriptName}.log"
 export logname
-downloadUrl=$("${baseDirectory}/get_latest_pios.sh -t")
+downloadUrl="$(${baseDirectory}/get_latest_pios.sh -t)"
 baseImage=$(echo ${downloadUrl} | sed 's:.*/::')
 baseImage=${baseImage::-3}
 
@@ -91,7 +91,8 @@ fDebugLog 0 "Running ${baseDirectory}/sdm --customize"
     --plugin 50btfix:"assetDir=${baseDirectory}/plugins/assets" \
     --plugin 50enablenetfwd \
     --plugin 50instlvmxfs \
-    --plugin 60pxehost:"netIface=eth1|ipAddr=192.168.1.1|dnsaddr=192.168.1.1|brdAddr=192.168.1.255|gwAddr=192.168.1.1|dhcpRange=192.168.1.2,192.168.1.10,255.255.255.0,6h|tftpRoorDir=/srv/netboot/tftp/|nfsRoorDir=/srv/netboot/nfs/" \
+    --plugin 60pxehost:"netIface=eth1|ipAddr=192.168.1.1|dnsaddr=192.168.1.1|brdAddr=192.168.1.255|gwAddr=192.168.1.1|dhcpRange=192.168.1.2,192.168.1.10,255.255.255.0,6h|tftpRootDir=/srv/netboot/tftp/|nfsRootDir=/srv/netboot/nfs/" \
+    --plugin 70devtools \
     --plugin-debug \
     --extend \
     --xmb 1024 \
