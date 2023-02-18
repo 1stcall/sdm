@@ -13,6 +13,7 @@ function negrep(){
 	fileName="${1:--}"
 	printf "fileName=${fileName}\n" 1>&2
 	grep --color=always -e "^" -e "^E:" -e "^W:" "${fileName}" \
-		| grep --color=always -i "error\|warning\|problem\|fail\|fatal\|panic\|not found\|missing\|could not\|Unrecognized"
+		| grep --color=always -i \
+			"error\|warning\|problem\|fail\|fatal\|panic\|not found\|missing\|could not\|unrecognized\|unable\|unavailable\|doh\|not specified\|omitting"
 }
 export -f negrep

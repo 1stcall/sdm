@@ -10,7 +10,7 @@
 #
 source $SDMPT/etc/sdm/sdm-readparams
 #
-DEBUG=${custom1:-0}
+DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"*Plugin*-${(basename $0)%%.*}"}
 phase=$1
 pfx="$(basename $0)"     #For messages
 args="$2"
@@ -25,38 +25,38 @@ then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 0"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 0"
     #
     # Print the keys found (example usage). plugin_getargs returns the list of found keys in $foundkeys
     #
-    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 1 "* Plugin $pfx: Copying $assetDir/backports.list > $SDMPT/etc/apt/sources.list.d/"
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/backports.list > $SDMPT/etc/apt/sources.list.d/"
     cp -av --reflink=auto $assetDir/bullseye-backports.list $SDMPT/etc/apt/sources.list.d/
     #
-    fDebugLog 1 "* Plugin $pfx: Copying $assetDir/90_backports > $SDMPT/etc/apt/preferences.d/"
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/90_backports > $SDMPT/etc/apt/preferences.d/"
     cp -av --reflink=auto $assetDir/90_backports $SDMPT/etc/apt/preferences.d/
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 0" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0" wait
     #
 elif [ "$phase" == "1" ]
 then
     #
     # Phase 1 (in nspawn)
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 1 (in nspawn)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
     #
     fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 1" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1" wait
     #
 else
     #
     # Plugin Post-install edits
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase post-install"
+    fDebugLog 1 "* Plugin $pfx: Start Phase post-install"
     #
     fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase post-install" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait
 fi

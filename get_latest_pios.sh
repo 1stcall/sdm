@@ -6,7 +6,7 @@ DEBUG=${DEBUG:-0}
 [ "$DEBUG" -ge 1 ]  && set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
 [ "$DEBUG" -ge 1 ]  && set -o nounset                                      # Treat unset variables as an error when substituting.
 [ "$DEBUG" -ge 1 ]  && set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
-[ "$DEBUG" -ge 10 ] && set -x                                               # Debugging
+[ "$DEBUG" -ge 11 ] && set -x                                               # Debugging
 [ "$DEBUG" -ge 1 ]  && export DEBUG
 #
 SOURCE=${BASH_SOURCE[0]}
@@ -18,8 +18,8 @@ done
 baseDir=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 scriptName=`basename "$(realpath ${BASH_SOURCE[0]})"`
 source "${baseDir}/common.sh"
-logname="${baseDir}scriptName.log"
-export logname
+logname="${baseDir}/logs/scriptName.log"
+#export logname
 
 function printhelp() {
     echo $"${scriptName} $version
@@ -79,22 +79,22 @@ done
 
 [ $pvers -eq 1 ] && echo "${scriptName} Version $version" && exit 0
 
-fDebugLog 0 "DEBUG=${DEBUG}"
-fDebugLog 1 "baseUrl=${baseUrl}" 
+fDebugLog 2 "DEBUG=${DEBUG} scriptName=${scriptName} LOGPREFIX=${LOGPREFIX}" wait
+fDebugLog 2 "baseUrl=${baseUrl}" 
 latestUrl=$(curl -s ${baseUrl} | sed -n 's/.*href="\([^"]*\).*/\1/p' | tail -1)
 
-fDebugLog 1 "latestUrl=${latestUrl}" 
+fDebugLog 2 "latestUrl=${latestUrl}" 
 filename=$(curl -s ${baseUrl}${latestUrl} | sed -n 's/.*href="\([^"]*\).*/\1/p' | head -3 | tail -1)
 
-fDebugLog 1 "filename=${filename}" 
+fDebugLog 2 "filename=${filename}" 
 downloadUrl="${baseUrl}${latestUrl}${filename}"
 
-fDebugLog 0 "downloadUrl=${downloadUrl}"
+fDebugLog 1 "downloadUrl=${downloadUrl}"
 extractedFilename=${filename::-3}
 
-fDebugLog 0 "extractedFilename=${extractedFilename}"
+fDebugLog 1 "extractedFilename=${extractedFilename}"
 if [ ${testing} -eq 0 ]; then
-    fDebugLog 1 "About to download ${downloadUrl}" yesno && curl ${downloadUrl} | unxz - > ./${extractedFilename}
+    fDebugLog 2 "About to download ${downloadUrl}" yesno && curl ${downloadUrl} | unxz - > ./${extractedFilename}
 else
     echo "${downloadUrl}" 2>&1
 fi

@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# This is an sdm plugin for: test.  This is a test plugin to experiment with code.
+#0
+# The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
+# $1 is the phase: "0", "1", or "post-install"
+# $2 is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+#
+# Main code for the Plugin
+#
+[[ $- == *i* ]] && isInteractive="Interactive" || isInteractive="Not interactive"
+[[ $EUID -eq 0 ]] && isRoot="Running as root" || isRoot="Not running as root"
+source $SDMPT/etc/sdm/sdm-readparams
+#
+DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"***NOT SET***"}
+phase=$1
+pfx="$(basename $0)"     #For messages
+args="$2"
+#
+plugin_getargs $pfx "$args" "|assetDir|"
+source $SDMPT/usr/local/sdm/common.sh || exit 1
+fDebugLog 3 "* Plugin $pfx: Sucessfully sourced $SDMPT/usr/local/sdm/common.sh " wait 3
+#
+if [ "$phase" == "0" ]
+then
+    #
+    # In Phase 0 (Mounted environment) all references to directories in the image must be preceded by $SDMPT
+    #
+    fDebugLog 1 "* Plugin $pfx: Start Phase 0 (Mounted environment)"
+    fDebugLog 3 "$(plugin_printkeys)"
+    #
+    fDebugLog 3 "* Plugin $pfx: This plugin is being run as ${isInteractive}"
+    fDebugLog 3 "* Plugin $pfx: This plugin is ${isRoot}"
+    fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}    myuser=${myuser}"
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait 3
+    #
+elif [ "$phase" == "1" ]
+then
+    #
+    # Phase 1 (in nspawn)
+    #
+    fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
+    fDebugLog 3 "$(plugin_printkeys)"
+    #
+    fDebugLog 3 "* Plugin $pfx: This plugin is being run as ${isInteractive}"
+    fDebugLog 3 "* Plugin $pfx: This plugin is ${isRoot}"
+    #
+    #logfreespace "at end of $pfx Phase 1 (in nspawn)"
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait 3
+    #
+else
+    #
+    # Plugin Phase 2 (post-install) edits
+    #
+    fDebugLog 1 "* Plugin $pfx: Start Phase Phase 2 (post-install)"
+    fDebugLog 3 "$(plugin_printkeys)"
+    #    
+    fDebugLog 3 "* Plugin $pfx: This plugin is being run as ${isInteractive}"
+    fDebugLog 3 "* Plugin $pfx: This plugin is ${isRoot}"
+    fDebugLog 3 "renamepi=$renamepi    myuser=$myuser"
+    #
+    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" wait 3
+fi

@@ -10,12 +10,12 @@
 #
 source $SDMPT/etc/sdm/sdm-readparams
 #
-DEBUG=${custom1:-0}
+DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"*Plugin*-${(basename $0)%%.*}"}
 phase=$1
 pfx="$(basename $0)"     #For messages
 args="$2"
 #
-plugin_getargs $pfx "$args" "|netIface|ipAddr|dnsaddr|brdAddr|gwAddr|dhcpRange|tftpRootDir|nfsRootDir|"
+plugin_getargs $pfx "$args" "|assetDir|netIface|ipAddr|dnsaddr|brdAddr|gwAddr|dhcpRange|tftpRootDir|nfsRootDir|"
 [ -f $SDMPT/etc/sdm/assets/common.sh ] || cp -va $assetDir/common.sh $SDMPT/etc/sdm/assets/common.sh
 source $SDMPT/etc/sdm/assets/common.sh
 fDebugLog 3 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/assets/common.sh" wait
@@ -25,41 +25,43 @@ then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 0"
-    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 0"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 1 "* Plugin $pfx: Nothing to do"
+#    fDebugLog 2 "* Plugin $pfx: Nothing to do"
+    fDebugLog 1 "* Plugin $pfx: Updating fstab from ${assetDir}/my-fstab"
+    cat ${assetDir}/my-fstab | tee -a $SDMPT/etc/fstab
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 0" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0" wait
     #
 elif [ "$phase" == "1" ]
 then
     #
     # Phase 1 (in nspawn)
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 1 (in nspawn)"
-    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 2 $(logfreespace "at start of Plugin $pfx Phase 1")
-    #
-    fDebugLog 1 "> Plugin $pfx: Install dnsmasq, nfs-kernel-server & systemd-resolved"
+    fDebugLog 3 $(logfreespace "at start of Plugin $pfx Phase 1")
+    
+    fDebugLog 2 "> Plugin $pfx: Install dnsmasq, nfs-kernel-server & systemd-resolved"
     #doaptrpterror "install --no-install-recommends -y dnsmasq nfs-kernel-server systemd-resolved" "${showapt}"
     doaptrpterror "install --no-install-recommends -y dnsmasq nfs-kernel-server" "${showapt}"
     #
-    fDebugLog 2 $(logfreespace "at end of $pfx Phase 1")
+    fDebugLog 3 $(logfreespace "at end of $pfx Phase 1")
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 1" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1" wait
     #
 else
     #
     # Plugin Post-install edits
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase post-install"
+    fDebugLog 1 "* Plugin $pfx: Start Phase post-install"
     #
-    fDebugLog 1 "> Plugin $pfx: blocking interface ${netIface} from dhcpcd" 
+    fDebugLog 2 "> Plugin $pfx: blocking interface ${netIface} from dhcpcd" 
     echo "denyinterfaces pattern ${netIface}" | tee -a $SDMPT/etc/dhcpcd.conf
     #
-    fDebugLog 1 "> Plugin $pfx: Configuring dnsmasq"
+    fDebugLog 2 "> Plugin $pfx: Configuring dnsmasq"
     cat <<EOF | tee $SDMPT/etc/dnsmasq.conf
 interface=${netIface}
 port=0
@@ -70,7 +72,7 @@ tftp-root=${tftpRootDir}
 pxe-service=0,"Raspberry Pi Boot"
 EOF
     #
-    fDebugLog 1 "> Plugin $pfx: Configuring systemd-networkd"
+    fDebugLog 2 "> Plugin $pfx: Configuring systemd-networkd"
     cat <<EOF | tee $SDMPT/etc/systemd/network/10-${netIface}.netdev
 [Match]
 Name=${netIface}
@@ -91,11 +93,11 @@ DNS=${dnsaddr}
 Gateway=${gwAddr}
 EOF
     #
-#    fDebugLog 1 "> Plugin $pfx: Installing systemd-resolved"
+#    fDebugLog 2 "> Plugin $pfx: Installing systemd-resolved"
 #    doaptrpterror "install --no-install-recommends -y systemd-resolved" "${showapt}"
-    #fDebugLog 1 "> Plugin $pfx: Configuring systemd-resolved"
+    #fDebugLog 2 "> Plugin $pfx: Configuring systemd-resolved"
     #sed -i "s|^#DNS=$|DNS=${dnsaddr}|" /etc/systemd/resolved.conf
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase post-install" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait
     #
 fi

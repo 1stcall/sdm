@@ -2,24 +2,25 @@
 #
 set -e
 declare RESTORE=$(echo -en '\033[0m')
+declare GRAY=$(echo -en '\033[00;37m')
 declare RED=$(echo -en '\033[00;31m')
 declare GREEN=$(echo -en '\033[00;32m')
 declare YELLOW=$(echo -en '\033[00;33m')
 declare BLUE=$(echo -en '\033[00;34m')
-declare MAGENTA=$(echo -en '\033[00;35m')
+declare MAGENTA=$(echo -en '\033[00;95m')
 declare PURPLE=$(echo -en '\033[00;35m')
 declare CYAN=$(echo -en '\033[00;36m')
-declare LIGHTGRAY=$(echo -en '\033[00;37m')
+declare LGRAY=$(echo -en '\033[01;37m')
 declare LRED=$(echo -en '\033[01;31m')
 declare LGREEN=$(echo -en '\033[01;32m')
 declare LYELLOW=$(echo -en '\033[01;33m')
 declare LBLUE=$(echo -en '\033[01;34m')
-declare LMAGENTA=$(echo -en '\033[01;35m')
+declare LMAGENTA=$(echo -en '\033[01;95m')
 declare LPURPLE=$(echo -en '\033[01;35m')
 declare LCYAN=$(echo -en '\033[01;36m')
 declare WHITE=$(echo -en '\033[01;37m')
-declare scriptName=$(basename -- "${0}")
-declare LOGPREFIX=${LOGPREFIX:-${scriptName}}
+declare scriptName=${scriptName:-$(basename -- "${0}")}
+declare LOGPREFIX=${LOGPREFIX:-${scriptName%%.*}}
 #
 declare -rx callingUser=$(who am i | awk '{print $1}')
 #
@@ -38,13 +39,30 @@ debug(){
         echo $line | tee -a "${outname}"
     done
 }
-export debug
+#export debug
 #
 log(){
     LOGMG="${1}"
-    printf "${GREEN}%s %s${RESTORE} ${LCYAN}%s : ${LBLUE}%s${RESTORE}\n" $(date +'%Y/%m/%d %T') ${LOGPREFIX} "${LOGMG}" | tee -a ${logname}
+    LOGLVL="${2:-0}"
+    case  ${LOGLVL} in 
+        0)  LOGCOLOR=$LGREEN ;;
+        1)  LOGCOLOR=$GRAY ;;
+        2)  LOGCOLOR=$LCYAN ;;
+        3)  LOGCOLOR=$CYAN ;;
+        4)  LOGCOLOR=$LYELLOW ;;
+        5)  LOGCOLOR=$YELLOW ;;
+        6)  LOGCOLOR=$LMAGENTA ;;
+        7)  LOGCOLOR=$MAGENTA ;;
+        *)  LOGCOLOR=$RED;;
+    esac
+
+    printf "${GREEN}%s${RESTORE} : ${LCYAN}%s${RESTORE} : ${LOGCOLOR}%s${RESTORE}\n" \
+        "$(date +'%Y/%m/%d %T')" \
+        "${LOGPREFIX}" \
+        "${LOGMG}" \
+        | tee -a ${logname}
 }
-export log
+#export log
 #
 function displaytime {
   local T="${1}"
@@ -58,7 +76,7 @@ function displaytime {
   (( $D > 0 || $H > 0 || $M > 0 )) && printf 'and '
   printf '%d seconds\n' $S
 }
-export displaytime
+#export displaytime
 
 function doCommand {
     local cmdToRun="${1}"
@@ -70,12 +88,12 @@ function doCommand {
         log "$line"
     done
  }
- export doCommand
+ #export doCommand
           
 function fDebugLog() {
     OLDIFS=${IFS}
     IFS=''
-    pfx="*DBG ${scriptName}:"
+    pfx="${scriptName}"
     logLvl=${1:-99}             # Logging level to log message at.
     logMsg="${2:-"NO MSG"}"     # Messge to log.
     logWait="${3:-"nowait"}"    # wait="Press any key to continue."
@@ -84,12 +102,12 @@ function fDebugLog() {
     minDebugWait=${4:-5}        # Minimug debug level to wait for keypress.
 
     if [ $logLvl -le $DEBUG ]; then
-        log "$pfx [${logLvl}/${DEBUG}] ${logMsg}" 1>&2
+        log "[${logLvl}/${DEBUG}] ${logMsg}" $logLvl 1>&2
         if [ "$logWait" == "wait" ] && [ "$DEBUG" -ge ${minDebugWait} ]; then
-            log "$pfx Press any key to continue..." 1>&2
+            log "Press any key to continue..." $logLvl 1>&2
             read -n 1 -s -r
         elif [ "$logWait" == "yesno" ]; then
-            log "$pfx Do you wish to continue? (Y/N)" 1>&2
+            log "Do you wish to continue? (Y/N)" $logLvl 1>&2
             while true
                 do
                     read -r -n 1 -s choice
@@ -103,10 +121,10 @@ function fDebugLog() {
     fi
     IFS=${OLDIFS}
 }
-export fDebugLog
+#export fDebugLog
 
 function errexit() {
     echo -e "$1" 1>&2
     exit 1
 }
-export errexit
+#export errexit

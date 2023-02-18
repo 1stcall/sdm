@@ -10,7 +10,7 @@
 #
 source $SDMPT/etc/sdm/sdm-readparams
 #
-DEBUG=${custom1:-0}
+DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"*Plugin*-${(basename $0)%%.*}"}
 phase=$1
 pfx="$(basename $0)"     #For messages
 args="$2"
@@ -25,44 +25,44 @@ then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 0"
-    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 0"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 1 "* Plugin $pfx: Enabling net forward."
+    fDebugLog 2 "* Plugin $pfx: Enabling net forward."
     cp -av --reflink=auto $SDMPT/etc/sysctl.conf $SDMPT/etc/sysctl.conf.orig  
     cat $SDMPT/etc/sysctl.conf | \
         sed 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' | \
         sed 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' \
         | tee $SDMPT/etc/sysctl.conf
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 0" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0" wait
     #
 elif [ "$phase" == "1" ]
 then
     #
     # Phase 1 (in nspawn)
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 1 (in nspawn)"
-    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 1 "* Plugin $pfx: Enabling net forward."
+    fDebugLog 2 "* Plugin $pfx: Enabling net forward."
     cp -av --reflink=auto $SDMPT/etc/sysctl.conf $SDMPT/etc/sysctl.conf.orig  
     cat $SDMPT/etc/sysctl.conf | \
         sed 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' | \
         sed 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' \
         | tee $SDMPT/etc/sysctl.conf
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 1" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1" wait
     #
 else
     #
     # Plugin Post-install edits
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase post-install"
-    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase post-install"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 1 "* Plugin $pfx: Nothing to do"
+    fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase post-install" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait
     #
 fi

@@ -6,7 +6,7 @@ DEBUG=${DEBUG:-0}
 [ "$DEBUG" -ge 1 ]  && set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
 [ "$DEBUG" -ge 1 ]  && set -o nounset                                      # Treat unset variables as an error when substituting.
 [ "$DEBUG" -ge 1 ]  && set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
-[ "$DEBUG" -ge 10 ] && set -x                                              # Debugging 1=extra logging, 2= verbose to commands, 3= pauses, 4= set -x
+[ "$DEBUG" -ge 11 ] && set -x                                              # Debugging 1=extra logging, 2= verbose to commands, 3= pauses, 4= set -x
 [ "$DEBUG" -ge 1 ]  && declare -x DEBUG
                                                     # a non-zero status, or zero if no command exited with a non-zero status.
 declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev/sdm}
@@ -27,86 +27,115 @@ while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 baseDir=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
-scriptName=`basename "$(realpath ${BASH_SOURCE[0]})"`
+#scriptName=`basename "$(realpath ${BASH_SOURCE[0]})"`
+scriptName=$(basename "$(realpath ${BASH_SOURCE[0]})")
+scriptName=${scriptName%%.*}
 source "${baseDir}/common.sh"
-logname="${baseDir}/${scriptName}.log"
-export logname
+logname="${baseDir}/logs/${scriptName}.log"
+#export logname
+fDebugLog 1 "Starting $scriptName at $STARTBUILD."
 downloadUrl="$(${baseDirectory}/get_latest_pios.sh -t)"
 baseImage=$(echo ${downloadUrl} | sed 's:.*/::')
 baseImage=${baseImage::-3}
 
-fDebugLog 1 "callingUser=${callingUser}"
-fDebugLog 1 "downloadUrl=${downloadUrl}"
-fDebugLog 1 "baseDirectory=${baseDirectory}"
-fDebugLog 1 "baseImageDirectory=${baseImageDirectory}"
-fDebugLog 1 "baseImage=${baseImage}"
-fDebugLog 1 "hostName=${hostName}"
+fDebugLog 2 "callingUser=${callingUser}"
+fDebugLog 2 "downloadUrl=${downloadUrl}"
+fDebugLog 2 "baseDirectory=${baseDirectory}"
+fDebugLog 2 "baseImageDirectory=${baseImageDirectory}"
+fDebugLog 2 "baseImage=${baseImage}"
+fDebugLog 2 "hostName=${hostName}"
 
 if [ ! -d "${baseDirectory}/${baseImageDirectory}/" ] ; then
-    fDebugLog 1 "Making directory ${baseDirectory}/${baseImageDirectory}/"
+    fDebugLog 2 "Making directory ${baseDirectory}/${baseImageDirectory}/"
     su ${callingUser} --command="mkdir -pv ${baseDirectory}/${baseImageDirectory}/"
 else
-    fDebugLog 1 "Skipping Making directory ${baseDirectory}/${baseImageDirectory}/"
+    fDebugLog 2 "Skipping Making directory ${baseDirectory}/${baseImageDirectory}/"
 fi
 
 if [ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ] ; then
-    fDebugLog 0 "Downloading & extracting ${downloadUrl}"
+    fDebugLog 1 "Downloading & extracting ${downloadUrl}"
     fDebugLog 5 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}" yesno
     curlOps="" && [ "$DEBUG" -ge 2 ] && curlOps="--verbose"
     su ${callingUser} --command="curl $curlOps $downloadUrl | unxz - > ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 else
-    fDebugLog 1 "Skipping Downloading & extracting $downloadUrl"
-    fDebugLog 1 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
+    fDebugLog 2 "Skipping Downloading & extracting $downloadUrl"
+    fDebugLog 2 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 fi
 
 if [ ! -d "${baseDirectory}/output/" ] ; then
-    fDebugLog 1 "Making directory ${baseDirectory}/output/"
+    fDebugLog 2 "Making directory ${baseDirectory}/output/"
     su ${callingUser} --command="mkdir -pv ${baseDirectory}/output/"
 else
-    fDebugLog 1 "Skipping Making directory ${baseDirectory}/output/"
+    fDebugLog 2 "Skipping Making directory ${baseDirectory}/output/"
 fi
 
-fDebugLog 1 "Copying ${baseDirectory}/${baseImageDirectory}/${baseImage} to ${baseDirectory}/output/${hostName}.img"
-cp -av --reflink=auto "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}" "${baseDirectory}"/output/"${hostName}".img
+fDebugLog 2 "Copying ${baseDirectory}/${baseImageDirectory}/${baseImage} to ${baseDirectory}/output/1stcall.uk-base.img"
+cp -av --reflink=auto "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}" "${baseDirectory}"/output/1stcall.uk-base.img
 
-fDebugLog 0 "Running ${baseDirectory}/sdm --customize"
-"${baseDirectory}"/sdm --customize "${baseDirectory}"/output/"${hostName}".img \
+#fDebugLog 1 "Running ${baseDirectory}/sdm --customize"
+#"${baseDirectory}"/sdm --customize "${baseDirectory}"/output/"${hostName}".img \
+#    --logwidth 999 \
+#    --apt-dist-upgrade \
+#    --disable piwiz,swap \
+#    --dtoverlay i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host \
+#    --dtparam i2c_vc=on \
+#    --l10n \
+#    --restart \
+#    --showapt \
+#    --showpwd \
+#    --svcdisable fake-hwclock \
+#    --wpa /etc/wpa_supplicant/wpa_supplicant.conf \
+#    --batch \
+#    --fstab "${baseDirectory}"/my-fstab \
+#    --plugin apt-file \
+#    --plugin 00mydotfiles:"assetDir=${baseDirectory}/plugins/assets" \
+#    --plugin 10bullseye-backports:"assetDir=${baseDirectory}/plugins/assets" \
+#    --plugin 20configgit \
+#    --plugin 50btfix:"assetDir=${baseDirectory}/plugins/assets" \
+#    --plugin 50enablenetfwd \
+#    --plugin 50instlvmxfs \
+#    --plugin 60pxehost:"netIface=eth1|ipAddr=192.168.1.1|dnsaddr=192.168.1.1|brdAddr=192.168.1.255|gwAddr=192.168.1.1|dhcpRange=192.168.1.2,192.168.1.10,255.255.255.0,6h|tftpRootDir=/srv/netboot/tftp/|nfsRootDir=/srv/netboot/nfs/" \
+#    --plugin 70devtools \
+#    --plugin-debug \
+#    --extend \
+#    --xmb 1024 \
+#    --poptions apps \
+#    --apps "zram-tools command-not-found bash-completion tmux systemd-container apt-transport-https" \
+#    --rename-pi carl \
+#    --password-pi letmein123 \
+#    --custom1=$DEBUG
+#    --user carl \
+#    --password-user letmein123 \
+
+fDebugLog 1 "Running ${baseDirectory}/sdm --customize"
+"${baseDirectory}"/sdm --customize "${baseDirectory}"/output/1stcall.uk-base.img \
     --logwidth 999 \
     --apt-dist-upgrade \
     --disable piwiz,swap \
-    --dtoverlay i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host \
-    --dtparam i2c_vc=on \
     --l10n \
-    --restart \
+    --restart 1\
     --showapt \
     --showpwd \
-    --svcdisable fake-hwclock \
     --wpa /etc/wpa_supplicant/wpa_supplicant.conf \
     --batch \
-    --fstab "${baseDirectory}"/my-fstab \
+    --plugin 00test:"assetDir=${baseDirectory}/plugins/assets" \
     --plugin apt-file \
-    --plugin 00mydotfiles:"assetDir=${baseDirectory}/plugins/assets" \
-    --plugin 10bullseye-backports:"assetDir=${baseDirectory}/plugins/assets" \
-    --plugin 20configgit \
+    --plugin 10mydotfiles:"assetDir=${baseDirectory}/plugins/assets" \
+    --plugin 20bullseye-backports:"assetDir=${baseDirectory}/plugins/assets" \
     --plugin 50btfix:"assetDir=${baseDirectory}/plugins/assets" \
-    --plugin 50enablenetfwd \
-    --plugin 50instlvmxfs \
-    --plugin 60pxehost:"netIface=eth1|ipAddr=192.168.1.1|dnsaddr=192.168.1.1|brdAddr=192.168.1.255|gwAddr=192.168.1.1|dhcpRange=192.168.1.2,192.168.1.10,255.255.255.0,6h|tftpRootDir=/srv/netboot/tftp/|nfsRootDir=/srv/netboot/nfs/" \
-    --plugin 70devtools \
     --plugin-debug \
     --extend \
-    --xmb 1024 \
+    --xmb 2049 \
     --poptions apps \
-    --apps "zram-tools command-not-found bash-completion tmux systemd-container apt-transport-https" \
+    --apps "zram-tools command-not-found bash-completion tmux apt-transport-https" \
     --rename-pi carl \
     --password-pi letmein123 \
-    --custom1=$DEBUG
-#    --user carl \
-#    --password-user letmein123 \
+    --custom1=$DEBUG \
+    --custom2=${scriptName%%.*}
     
-fDebugLog 0 "Running ${baseDirectory}/sdm --shrink ${baseDirectory}/output/${hostName}.img"
-"${baseDirectory}"/sdm --shrink "${baseDirectory}"/output/"${hostName}".img || true
+fDebugLog 1 "Running ${baseDirectory}/sdm --shrink ${baseDirectory}/output/1stcall.uk-base.img"
+"${baseDirectory}"/sdm --shrink "${baseDirectory}"/output/1stcall.uk-base.img || true
 ENDBUILD=$(date)
-fDebugLog 0 "${scriptName} started at ${STARTBUILD} and compleated at ${ENDBUILD}."
+fDebugLog 1 "${scriptName} started at ${STARTBUILD} and compleated at ${ENDBUILD}."
 log "${scriptName} completed in $(displaytime $(( $(date +%s) - $STARTSEC )))"
 exit 0

@@ -1,8 +1,0 @@
-unxz
-curl
-xz-utils
-rsync
-parted
-file
-qemu-user-static
-binfmt-support

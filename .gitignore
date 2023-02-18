@@ -2,3 +2,4 @@ baseos/*
 output/*
 *.log
 *.out
+delme*

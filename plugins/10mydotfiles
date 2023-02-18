@@ -10,7 +10,7 @@
 #
 source $SDMPT/etc/sdm/sdm-readparams
 #
-DEBUG=${custom1:-0}
+DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"*Plugin*-${(basename $0)%%.*}"}
 phase=$1
 pfx="$(basename $0)"     #For messages
 args="$2"
@@ -18,61 +18,61 @@ args="$2"
 plugin_getargs $pfx "$args" "|assetDir|"
 [ -f $SDMPT/etc/sdm/assets/common.sh ] || cp -va $assetDir/common.sh $SDMPT/etc/sdm/assets/common.sh
 source $SDMPT/etc/sdm/assets/common.sh
-fDebugLog 3 "Sucessfully sourced $SDMPT/etc/sdm/assets/common.sh" wait
+fDebugLog 3 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/assets/common.sh" wait
 #
 if [ "$phase" == "0" ]
 then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 0"
-    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 0"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 1 "* Plugin $pfx: Copying plugin-assets to image"
+    fDebugLog 2 "* Plugin $pfx: Copying plugin-assets to image"
     cp -av --reflink=auto $assetDir/ $SDMPT/etc/sdm/assets/myassets
     #
-    fDebugLog 3 "renamepi=$renamepi    myuser=$myuser"
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 0" wait
+    fDebugLog 3 "* Plugin $pfx: renamepi=$renamepi    myuser=$myuser"
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0" wait
     #
 elif [ "$phase" == "1" ]
 then
     #
     # Phase 1 (in nspawn)
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 1 (in nspawn)"
-    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 1 "* Plugin $pfx: Nothing to do"
+    fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
     #logfreespace "at end of $pfx Phase 1"
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 1" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1" wait
     #
 else
     #
     # Plugin Post-install edits
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase post-install"
-    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase post-install"
+    fDebugLog 3 "$(plugin_printkeys)"
     #    
-    fDebugLog 1 "> Plugin $pfx: Copying .bash_aliases > home directory"
+    fDebugLog 2 "> Plugin $pfx: Copying .bash_aliases > home directory"
     cp -av --reflink=auto $SDMPT/etc/sdm/assets/myassets/.bash_aliases $SDMPT/home/$myuser/
     #
-    fDebugLog 1 "> Plugin $pfx: Copying .bashrc > home directory"
+    fDebugLog 2 "> Plugin $pfx: Copying .bashrc > home directory"
     cp -av --reflink=auto $SDMPT/etc/sdm/assets/myassets/.bashrc $SDMPT/home/$myuser/
     #
-    fDebugLog 1 "> Plugin $pfx: Linking .Xauthority so sudo gui apps works with X11 forwarding" 
+    fDebugLog 2 "> Plugin $pfx: Linking .Xauthority so sudo gui apps works with X11 forwarding" 
     ln -sv /home/carl/.Xauthority $SDMPT/root/.Xauthority
     #
-#    fDebugLog 1 "> Plugin $pfx: Creating directory ~/.ssh/"
+#    fDebugLog 2 "> Plugin $pfx: $Creating directory ~/.ssh/"
 #    mkdir -vp $SDMPT/home/$myuser/.ssh/
     #
-#    fDebugLog 1 "> Plugin $pfx: ********  NOT  ******* Copying .ssh/ > home directory  ***** NEED to decide how to handle keys!  ******"
+#    fDebugLog 2 "> Plugin $********  NOT  ******* Copying .ssh/ > home directory  ***** NEED to decide how to handle keys!  ******"
 #    cp -av --reflink=auto $SDMPT/etc/sdm/assets/myassets/{authorized_keys,known_hosts} $SDMPT/home/$myuser/.ssh/
     #
-#    fDebugLog 1 "* Plugin $pfx: Copying .local/ > home directory"
+#    fDebugLog 2 "* Plugin $pfx: Copying .local/ > home directory"
 #    cp -av --reflink=auto $SDMPT/etc/sdm/assets/myassets/.local/ $SDMPT/home/$myuser/.local/
     #
     fDebugLog 3 "renamepi=$renamepi    myuser=$myuser"
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase post-install" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait
 fi

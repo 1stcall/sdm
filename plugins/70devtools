@@ -10,7 +10,7 @@
 #
 source $SDMPT/etc/sdm/sdm-readparams
 #
-DEBUG=${custom1:-0}
+DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"*Plugin*-${(basename $0)%%.*}"}
 phase=$1
 pfx="$(basename $0)"     #For messages
 args="$2"
@@ -25,46 +25,47 @@ then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 0"
-#    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 0"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 1 "* Plugin $pfx: Nothing to do"
+    fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 0" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0" wait
     #
 elif [ "$phase" == "1" ]
 then
     #
     # Phase 1 (in nspawn)
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase 1 (in nspawn)"
-#    fDebugLog 2 "$(plugin_printkeys)"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
+    fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 2 $(logfreespace "at start of Plugin $pfx Phase 1")
+    fDebugLog 3 $(logfreespace "at start of Plugin $pfx Phase 1")
     #
-    fDebugLog 1 "> Plugin $pfx: Install tailscale repo and gpg key."
-    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.noarmor.gpg | sudo tee $SDMPT/usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
-    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.tailscale-keyring.list | sudo tee $SDMPT/etc/apt/sources.list.d/tailscale.list
+    fDebugLog 2 "> Plugin $pfx: Install tailscale repo and gpg key."
+    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.noarmor.gpg | tee $SDMPT/usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+    curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.tailscale-keyring.list | tee $SDMPT/etc/apt/sources.list.d/tailscale.list
     apt-get update
     #
-    fDebugLog 1 "> Plugin $pfx: Install nmap, tcpdump, tailscale, gparted"
-    doaptrpterror "install --no-install-recommends -y nmap tcpdump gparted" "${showapt}"
+    fDebugLog 2 "> Plugin $pfx: Install nmap, tcpdump, tailscale, gparted, systemd-container"
+    doaptrpterror "install --no-install-recommends -y nmap tcpdump gparted systemd-container" "${showapt}"
     #
-    fDebugLog 2 $(logfreespace "at end of $pfx Phase 1")
+    fDebugLog 3 $(logfreespace "at end of $pfx Phase 1")
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase 1" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1" wait
     #
 else
     #
     # Plugin Post-install edits
     #
-    fDebugLog 0 "* Plugin $pfx: Start Phase post-install"
+    fDebugLog 1 "* Plugin $pfx: Start Phase post-install"
     #
-    fDebugLog 1 "> Plugin $pfx: Installing systemd-resolved"
+    fDebugLog 2 "> Plugin $pfx: Installing & enabling systemd-networkd & systemd-resolved"
     doaptrpterror "install --no-install-recommends -y systemd-resolved" "${showapt}"
-    #fDebugLog 1 "> Plugin $pfx: Configuring systemd-resolved"
+    systemctl enable systemd-networkd systemd-resolved
+    #fDebugLog 2 "> Plugin $pfx: Configuring systemd-resolved"
     #sed -i "s|^#DNS=$|DNS=${dnsaddr}|" /etc/systemd/resolved.conf
     #
-    fDebugLog 0 "* Plugin $pfx: Complete Phase post-install" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait
     #
 fi
