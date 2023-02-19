@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-
-DEBUG=${DEBUG:-0}
-
-[ "$DEBUG" -ge 1 ]  && set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
-[ "$DEBUG" -ge 1 ]  && set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
-[ "$DEBUG" -ge 1 ]  && set -o nounset                                      # Treat unset variables as an error when substituting.
-[ "$DEBUG" -ge 1 ]  && set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
-[ "$DEBUG" -ge 11 ] && set -x                                              # Debugging 1=extra logging, 2= verbose to commands, 3= pauses, 4= set -x
-[ "$DEBUG" -ge 1 ]  && declare -x DEBUG
-                                                    # a non-zero status, or zero if no command exited with a non-zero status.
-declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev/sdm}
-declare baseImage               #&& baseImage=${baseImage:-2022-09-22-raspios-bullseye-arm64-lite.img}
-declare baseImageDirectory      && baseImageDirectory=${baseImageDirectory:-"baseos"}
-declare hostName                && hostName=${hostName:-"rpicm4-1"}
-declare baseUrl                 && baseUrl=${baseUrl:-"https://downloads.raspberrypi.org/"}
-declare downloadUrl
-
-declare STARTBUILD=$(date)
+#
 declare STARTSEC=$(date +%s)
-declare ENDBUILD=""
+declare STARTBUILD=$(date --date="@${STARTSEC}")
+declare ENDBUILD=
+declare DEBUG=${DEBUG:-0}
+#
+[ "$DEBUG" -ge 10 ]  && set -o errtrace         # If set, the ERR trap is inherited by shell functions.
+[ "$DEBUG" -ge 10 ]  && set -o errexit          # Exit immediately if a command exits with a non-zero status.
+[ "$DEBUG" -ge 10 ]  && set -o nounset          # Treat unset variables as an error when substituting.
+[ "$DEBUG" -ge 10 ]  && set -o pipefail         # The return value of a pipeline is the status of the last command to exit with
+                                                # a non-zero status, or zero if no command exited with a non-zero status.
+[ "$DEBUG" -ge 20 ] && set -x                   
+[ "$DEBUG" -ge 1 ]  && declare -x DEBUG         # Debugging 1=extra logging, 2= verbose to commands, 5= pauses, 11= set -x
+#
+declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev/sdm}
+declare baseImageDirectory      && baseImageDirectory=${baseImageDirectory:-"baseos"}
+declare baseImage               #&& baseImage=${baseImage:-2022-09-22-raspios-bullseye-arm64-lite.img}
+declare baseUrl                 && baseUrl=${baseUrl:-"https://downloads.raspberrypi.org/"}
+declare hostName                && hostName=${hostName:-"rpicm4-1"}
+declare downloadUrl
 #
 SOURCE=${BASH_SOURCE[0]}
 while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -27,42 +27,61 @@ while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 baseDir=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
-#scriptName=`basename "$(realpath ${BASH_SOURCE[0]})"`
 scriptName=$(basename "$(realpath ${BASH_SOURCE[0]})")
 scriptName=${scriptName%%.*}
-source "${baseDir}/common.sh"
+source "${baseDir}/assets/common.sh"
 logname="${baseDir}/logs/${scriptName}.log"
-#export logname
-fDebugLog 1 "Starting $scriptName at $STARTBUILD."
-downloadUrl="$(${baseDirectory}/get_latest_pios.sh -t)"
+#
+fDebugLog 2 "Starting $scriptName at $STARTBUILD.  Now calling get_latest_pios -t to get the download link."
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+fDebugLog 3 "${LYELLOW}| Start Output from get_latest_pios.sh --test    |"
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+downloadUrl="$(${baseDirectory}/get_latest_pios.sh --test)"
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+fDebugLog 3 "${LYELLOW}| End Output from get_latest_pios.sh --test      |"
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 baseImage=$(echo ${downloadUrl} | sed 's:.*/::')
+#baseImage=${baseImage%%.*}.img
 baseImage=${baseImage::-3}
 
-fDebugLog 2 "callingUser=${callingUser}"
-fDebugLog 2 "downloadUrl=${downloadUrl}"
-fDebugLog 2 "baseDirectory=${baseDirectory}"
-fDebugLog 2 "baseImageDirectory=${baseImageDirectory}"
-fDebugLog 2 "baseImage=${baseImage}"
-fDebugLog 2 "hostName=${hostName}"
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+fDebugLog 3 "${LYELLOW}| Running with the following settings. :-        |"
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+fDebugLog 3 "STARTSEC=${STARTSEC}"
+fDebugLog 3 "STARTBUILD=${STARTBUILD}"
+fDebugLog 3 "DEBUG=${DEBUG}"
+fDebugLog 3 "baseDirectory=${baseDirectory}"
+fDebugLog 3 "baseImageDirectory=${baseImageDirectory}"
+fDebugLog 3 "baseImage=${baseImage}"
+fDebugLog 3 "baseUrl=${baseUrl}"
+fDebugLog 3 "hostName=${hostName}"
+fDebugLog 3 "callingUser=${callingUser}"
+fDebugLog 3 "downloadUrl=${downloadUrl}"
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+fDebugLog 4 "Confirm settings." yesno 4
 
-if [ ! -d "${baseDirectory}/${baseImageDirectory}/" ] ; then
+if [[ ! -d "${baseDirectory}/${baseImageDirectory}/" ]]
+then
     fDebugLog 2 "Making directory ${baseDirectory}/${baseImageDirectory}/"
     su ${callingUser} --command="mkdir -pv ${baseDirectory}/${baseImageDirectory}/"
 else
     fDebugLog 2 "Skipping Making directory ${baseDirectory}/${baseImageDirectory}/"
 fi
 
-if [ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ] ; then
+if [[ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ]] ; then
     fDebugLog 1 "Downloading & extracting ${downloadUrl}"
-    fDebugLog 5 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}" yesno
+    fDebugLog 1 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
+    fDebugLog 4 "Proceed with download." yesno 4
     curlOps="" && [ "$DEBUG" -ge 2 ] && curlOps="--verbose"
     su ${callingUser} --command="curl $curlOps $downloadUrl | unxz - > ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 else
-    fDebugLog 2 "Skipping Downloading & extracting $downloadUrl"
-    fDebugLog 2 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
+    fDebugLog 2 "Skipping Downloading & extracting"
+    fDebugLog 2 "- ${downloadUrl}"
+    fDebugLog 2 "- to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 fi
 
-if [ ! -d "${baseDirectory}/output/" ] ; then
+if [[ ! -d "${baseDirectory}/output/" ]]
+then
     fDebugLog 2 "Making directory ${baseDirectory}/output/"
     su ${callingUser} --command="mkdir -pv ${baseDirectory}/output/"
 else
@@ -72,69 +91,51 @@ fi
 fDebugLog 2 "Copying ${baseDirectory}/${baseImageDirectory}/${baseImage} to ${baseDirectory}/output/1stcall.uk-base.img"
 cp -av --reflink=auto "${baseDirectory}"/"${baseImageDirectory}"/"${baseImage}" "${baseDirectory}"/output/1stcall.uk-base.img
 
-#fDebugLog 1 "Running ${baseDirectory}/sdm --customize"
-#"${baseDirectory}"/sdm --customize "${baseDirectory}"/output/"${hostName}".img \
-#    --logwidth 999 \
-#    --apt-dist-upgrade \
-#    --disable piwiz,swap \
-#    --dtoverlay i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host \
-#    --dtparam i2c_vc=on \
-#    --l10n \
-#    --restart \
-#    --showapt \
-#    --showpwd \
-#    --svcdisable fake-hwclock \
-#    --wpa /etc/wpa_supplicant/wpa_supplicant.conf \
-#    --batch \
-#    --fstab "${baseDirectory}"/my-fstab \
-#    --plugin apt-file \
-#    --plugin 00mydotfiles:"assetDir=${baseDirectory}/plugins/assets" \
-#    --plugin 10bullseye-backports:"assetDir=${baseDirectory}/plugins/assets" \
-#    --plugin 20configgit \
-#    --plugin 50btfix:"assetDir=${baseDirectory}/plugins/assets" \
-#    --plugin 50enablenetfwd \
-#    --plugin 50instlvmxfs \
-#    --plugin 60pxehost:"netIface=eth1|ipAddr=192.168.1.1|dnsaddr=192.168.1.1|brdAddr=192.168.1.255|gwAddr=192.168.1.1|dhcpRange=192.168.1.2,192.168.1.10,255.255.255.0,6h|tftpRootDir=/srv/netboot/tftp/|nfsRootDir=/srv/netboot/nfs/" \
-#    --plugin 70devtools \
-#    --plugin-debug \
-#    --extend \
-#    --xmb 1024 \
-#    --poptions apps \
-#    --apps "zram-tools command-not-found bash-completion tmux systemd-container apt-transport-https" \
-#    --rename-pi carl \
-#    --password-pi letmein123 \
-#    --custom1=$DEBUG
-#    --user carl \
-#    --password-user letmein123 \
+sdmCmd="${baseDirectory}/sdm --customize ${baseDirectory}/output/1stcall.uk-base.img"
+sdmCmd="${sdmCmd} --logwidth 999"
+sdmCmd="${sdmCmd} --apt-dist-upgrade"
+sdmCmd="${sdmCmd} --disable piwiz,swap"
+sdmCmd="${sdmCmd} --l10n"
+sdmCmd="${sdmCmd} --restart 1"
+sdmCmd="${sdmCmd} --showapt"
+sdmCmd="${sdmCmd} --showpwd"
+sdmCmd="${sdmCmd} --wpa /etc/wpa_supplicant/wpa_supplicant.conf"
+sdmCmd="${sdmCmd} --batch"
+sdmCmd="${sdmCmd} --extend"
+sdmCmd="${sdmCmd} --xmb 2049"
+sdmCmd="${sdmCmd} --poptions apps"
+sdmCmd="${sdmCmd} --apps zram-tools command-not-found bash-completion tmux apt-transport-https"
+sdmCmd="${sdmCmd} --rename-pi carl"
+sdmCmd="${sdmCmd} --password-pi letmein123"
+sdmCmd="${sdmCmd} --custom1=${DEBUG}"
+sdmCmd="${sdmCmd} --custom2=${scriptName%%.*}"
+sdmCmd="${sdmCmd} --plugin apt-file"
+sdmCmd="${sdmCmd} --plugin 00test:assetDir=\"${baseDirectory}/assets\""
+sdmCmd="${sdmCmd} --plugin 10mydotfiles:assetDir=\"${baseDirectory}/assets\""
+sdmCmd="${sdmCmd} --plugin 20bullseye-backports:assetDir=\"${baseDirectory}/assets\""
+sdmCmd="${sdmCmd} --plugin 50btfix:assetDir=\"${baseDirectory}/assets\""
+sdmCmd="${sdmCmd} --plugin-debug"
+fDebugLog 1 "Running ${sdmCmd}"
+fDebugLog 4 "Proceed running command." yesno 4
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+fDebugLog 3 "${LYELLOW}| Start Output from sdm --custmoize              |"
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+${sdmCmd}
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+fDebugLog 3 "${LYELLOW}| End Output from sdm --custmoize                |"
+fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 
-fDebugLog 1 "Running ${baseDirectory}/sdm --customize"
-"${baseDirectory}"/sdm --customize "${baseDirectory}"/output/1stcall.uk-base.img \
-    --logwidth 999 \
-    --apt-dist-upgrade \
-    --disable piwiz,swap \
-    --l10n \
-    --restart 1\
-    --showapt \
-    --showpwd \
-    --wpa /etc/wpa_supplicant/wpa_supplicant.conf \
-    --batch \
-    --plugin 00test:"assetDir=${baseDirectory}/plugins/assets" \
-    --plugin apt-file \
-    --plugin 10mydotfiles:"assetDir=${baseDirectory}/plugins/assets" \
-    --plugin 20bullseye-backports:"assetDir=${baseDirectory}/plugins/assets" \
-    --plugin 50btfix:"assetDir=${baseDirectory}/plugins/assets" \
-    --plugin-debug \
-    --extend \
-    --xmb 2049 \
-    --poptions apps \
-    --apps "zram-tools command-not-found bash-completion tmux apt-transport-https" \
-    --rename-pi carl \
-    --password-pi letmein123 \
-    --custom1=$DEBUG \
-    --custom2=${scriptName%%.*}
-    
-fDebugLog 1 "Running ${baseDirectory}/sdm --shrink ${baseDirectory}/output/1stcall.uk-base.img"
-"${baseDirectory}"/sdm --shrink "${baseDirectory}"/output/1stcall.uk-base.img || true
+sdmCmd="${baseDirectory}/sdm --shrink ${baseDirectory}/output/1stcall.uk-base.img"
+fDebugLog 1 "Running ${sdmCmd}"
+fDebugLog 4 "Proceed running command." yesno 4
+fDebugLog 3 "${LYELLOW}----------------------------------------"
+fDebugLog 3 "${LYELLOW}| Start Output from sdm --shrink       |"
+fDebugLog 3 "${LYELLOW}----------------------------------------"
+${sdmCmd}
+fDebugLog 3 "${LYELLOW}----------------------------------------"
+fDebugLog 3 "${LYELLOW}| End Output from sdm --shrink         |"
+fDebugLog 3 "${LYELLOW}----------------------------------------"
+
 ENDBUILD=$(date)
 fDebugLog 1 "${scriptName} started at ${STARTBUILD} and compleated at ${ENDBUILD}."
 log "${scriptName} completed in $(displaytime $(( $(date +%s) - $STARTSEC )))"

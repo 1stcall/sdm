@@ -10,10 +10,16 @@ alias higrep='grep --color=always -e "^" -e '
 alias trashboot='sudo /home/$USER/.local/usr/bin/trashboot.sh'
 
 function negrep(){
-	fileName="${1:--}"
-	printf "fileName=${fileName}\n" 1>&2
-	grep --color=always -e "^" -e "^E:" -e "^W:" "${fileName}" \
-		| grep --color=always -i \
-			"error\|warning\|problem\|fail\|fatal\|panic\|not found\|missing\|could not\|unrecognized\|unable\|unavailable\|doh\|not specified\|omitting"
+#	set -x
+	files="${@:--}"
+	for fileName in $files
+	do 
+		printf "\n    #### fileName=%s ####\n\n" ${fileName}
+		grep --color=always -n -e "^" -e "^E:" -e "^W:" "${fileName}" \
+			| grep --color=always -i \
+			"error\|warning\|problem\|fail\|fatal\|panic\|not found\|missing\|could not\|unrecognized\|unable\|unavailable\|doh\|not specified\|omitting" 2>&1
+		:
+	done
+#	set +x
 }
 export -f negrep

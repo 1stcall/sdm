@@ -1,5 +1,6 @@
-baseos/*
-output/*
+baseos/
+output/
 *.log
 *.out
 delme*
+scratch/

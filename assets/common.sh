@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-set -e
+#set -e
 declare RESTORE=$(echo -en '\033[0m')
 declare GRAY=$(echo -en '\033[00;37m')
 declare RED=$(echo -en '\033[00;31m')
@@ -22,7 +22,7 @@ declare WHITE=$(echo -en '\033[01;37m')
 declare scriptName=${scriptName:-$(basename -- "${0}")}
 declare LOGPREFIX=${LOGPREFIX:-${scriptName%%.*}}
 #
-declare -rx callingUser=$(who am i | awk '{print $1}')
+declare callingUser=$(who am i | awk '{print $1}')
 #
 function fRunAs(){
     local slCmdToRun="${1:-:}"
@@ -91,28 +91,29 @@ function doCommand {
  #export doCommand
           
 function fDebugLog() {
+    DEBUG=${DEBUG:-0}
     OLDIFS=${IFS}
     IFS=''
-    pfx="${scriptName}"
+    pfx="${scriptName:-"NO SCRIPTNAME"}"
     logLvl=${1:-99}             # Logging level to log message at.
-    logMsg="${2:-"NO MSG"}"     # Messge to log.
+    logMsg="${2:-"NO LOGMSG"}"     # Messge to log.
     logWait="${3:-"nowait"}"    # wait="Press any key to continue."
                                 # yesno="Do you wish to continue (Y/N)?"
                                 # nowait=Don't wait.
     minDebugWait=${4:-5}        # Minimug debug level to wait for keypress.
 
-    if [ $logLvl -le $DEBUG ]; then
-        log "[${logLvl}/${DEBUG}] ${logMsg}" $logLvl 1>&2
-        if [ "$logWait" == "wait" ] && [ "$DEBUG" -ge ${minDebugWait} ]; then
-            log "Press any key to continue..." $logLvl 1>&2
+    if [[ $logLvl -le $DEBUG ]]; then
+        log "[${logLvl}/${DEBUG}/${minDebugWait}] ${logMsg}" $logLvl 1>&2
+        if [[ "$logWait" == "wait" ]] && [[ "$DEBUG" -ge ${minDebugWait} ]]; then
+            log "[${logLvl}/${DEBUG}/${minDebugWait}] Press any key to continue..." $logLvl 1>&2
             read -n 1 -s -r
-        elif [ "$logWait" == "yesno" ]; then
-            log "Do you wish to continue? (Y/N)" $logLvl 1>&2
+        elif [[ "$logWait" == "yesno" ]] && [[ "$DEBUG" -ge ${minDebugWait} ]]; then
+            log "[${logLvl}/${DEBUG}/${minDebugWait}] Do you wish to continue? (Y/N)" $logLvl 1>&2
             while true
                 do
                     read -r -n 1 -s choice
                     case "$choice" in
-                        n|N) exit 1;;
+                        n|N) return 1;;
                         y|Y) break;;
                         *) log "Response not valid"  1>&2 ;;
                     esac

@@ -1,27 +1,46 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
-# This is an sdm plugin for: test.  This is a test plugin to experiment with code.
-#0
-# The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
-# $1 is the phase: "0", "1", or "post-install"
-# $2 is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+function pluginHelp(){
+    cat <<EOF 1>&2
+I: 'phase: ${phase}'
+
+This is an sdm plugin for: ${pfx}.  This is a test plugin to experiment with code.
+
+The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
+'\$1' is the phase: "0", "1", or "post-install"
+'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+
+Valid arguments to this plugin are:-
+    assetDir    -   Directory where local assets such as common.sh are stored.
+
+EOF
+}
 #
 # Main code for the Plugin
 #
-[[ $- == *i* ]] && isInteractive="Interactive" || isInteractive="Not interactive"
-[[ $EUID -eq 0 ]] && isRoot="Running as root" || isRoot="Not running as root"
-source $SDMPT/etc/sdm/sdm-readparams
-#
-DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"***NOT SET***"}
-phase=$1
+phase=${1}
 pfx="$(basename $0)"     #For messages
 args="$2"
 #
-plugin_getargs $pfx "$args" "|assetDir|"
-source $SDMPT/usr/local/sdm/common.sh || exit 1
-fDebugLog 3 "* Plugin $pfx: Sucessfully sourced $SDMPT/usr/local/sdm/common.sh " wait 3
+# Check that phase is set to check if we are running within sdm.  If not set 
+# or set to help, then display help text & exit.
 #
-if [ "$phase" == "0" ]
+#[[ -z ${phase} ]] || [[ ${phase} =~ help ]] && pluginHelp && exit 0
+[[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
+#
+source $SDMPT/etc/sdm/sdm-readparams
+DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
+plugin_getargs $pfx "$args" "|assetDir|"
+#
+if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
+then 
+    cp -av $assetDir/common.sh $SDMPT/etc/sdm/local-assets/common.sh
+fi
+#
+source $SDMPT/etc/sdm/local-assets/common.sh
+fDebugLog 0 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
+#
+if [[ "$phase" == "0" ]]
 then
     #
     # In Phase 0 (Mounted environment) all references to directories in the image must be preceded by $SDMPT
@@ -29,12 +48,10 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase 0 (Mounted environment)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 3 "* Plugin $pfx: This plugin is being run as ${isInteractive}"
-    fDebugLog 3 "* Plugin $pfx: This plugin is ${isRoot}"
-    fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}    myuser=${myuser}"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait 3
+    fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}  -   myuser=${myuser}  -   callingUser=${callingUser}  -   USER=${USER}"
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
     #
-elif [ "$phase" == "1" ]
+elif [[ "$phase" == "1" ]]
 then
     #
     # Phase 1 (in nspawn)
@@ -42,11 +59,10 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 3 "* Plugin $pfx: This plugin is being run as ${isInteractive}"
-    fDebugLog 3 "* Plugin $pfx: This plugin is ${isRoot}"
+    fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}  -   myuser=${myuser}  -   callingUser=${callingUser}  -   USER=${USER}"
     #
     #logfreespace "at end of $pfx Phase 1 (in nspawn)"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait 3
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait
     #
 else
     #
@@ -55,9 +71,7 @@ else
     fDebugLog 1 "* Plugin $pfx: Start Phase Phase 2 (post-install)"
     fDebugLog 3 "$(plugin_printkeys)"
     #    
-    fDebugLog 3 "* Plugin $pfx: This plugin is being run as ${isInteractive}"
-    fDebugLog 3 "* Plugin $pfx: This plugin is ${isRoot}"
-    fDebugLog 3 "renamepi=$renamepi    myuser=$myuser"
+    fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}  -   myuser=${myuser}  -   callingUser=${callingUser}  -   USER=${USER}"
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" wait 3
+    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" wait
 fi

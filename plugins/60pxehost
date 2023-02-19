@@ -1,26 +1,58 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
-# This is an sdm plugin for: pxehost.  This configures my git environment.
-#
-# The plugin is called three times: for Phase 0, Phase 1, and post-install.
-# $1 is the phase: "0", "1", or "post-install"
-# $2 is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+function pluginHelp(){
+    cat <<EOF 1>&2
+I: 'phase: ${phase}'
+
+This is an sdm plugin for: ${pfx}.  This plugin configures my server to act as a netboot/pxe host.
+W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
+
+The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
+'\$1' is the phase: "0", "1", or "post-install"
+'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+
+Valid arguments to this plugin are:-
+    assetDir    -   Directory where local assets such as common.sh are stored.
+    netIface    -   Network interface to configure.
+    ipAddr      -   IP address to assign to the supplied netIface.
+    dnsaddr     -   DNS server to configue on DHCP clients.
+    brdAddr     -   Network broadcast address for the network being configured.
+    gwAddr      -   Network gateway address for the network being configured.
+    dhcpRange   -   The range of addresses, netmask & lease time for the DHCP server to assign.
+                    This should be in the form of a comma (,) seperated list.  
+                    ** You need to escape the commas (\,). **
+    tftpRootDir -   The root of the TFTP server that provides the /boot files.
+    nfsRootDir  -   The root of the NFS server that provides the /root files.
+
+W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
+EOF
+}
 #
 # Main code for the Plugin
 #
-source $SDMPT/etc/sdm/sdm-readparams
-#
-DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"*Plugin*-${(basename $0)%%.*}"}
-phase=$1
+phase=${1}
 pfx="$(basename $0)"     #For messages
 args="$2"
 #
-plugin_getargs $pfx "$args" "|assetDir|netIface|ipAddr|dnsaddr|brdAddr|gwAddr|dhcpRange|tftpRootDir|nfsRootDir|"
-[ -f $SDMPT/etc/sdm/assets/common.sh ] || cp -va $assetDir/common.sh $SDMPT/etc/sdm/assets/common.sh
-source $SDMPT/etc/sdm/assets/common.sh
-fDebugLog 3 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/assets/common.sh" wait
+# Check that phase is set to check if we are running within sdm.  If not set 
+# or set to help, then display help text & exit.
 #
-if [ "$phase" == "0" ]
+#[[ -z ${phase} ]] || [[ ${phase} =~ help ]] && pluginHelp && exit 0
+[[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
+#
+source $SDMPT/etc/sdm/sdm-readparams
+DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
+plugin_getargs $pfx "$args" "|assetDir|netIface|ipAddr|dnsaddr|brdAddr|gwAddr|dhcpRange|tftpRootDir|nfsRootDir|"
+#
+if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
+then 
+    cp -av $assetDir/common.sh $SDMPT/etc/sdm/local-assets/common.sh
+fi
+#
+source $SDMPT/etc/sdm/local-assets/common.sh
+fDebugLog 0 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
+#
+if [[ "$phase" == "0" ]]
 then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
@@ -34,7 +66,7 @@ then
     #
     fDebugLog 1 "* Plugin $pfx: Complete Phase 0" wait
     #
-elif [ "$phase" == "1" ]
+elif [[ "$phase" == "1" ]]
 then
     #
     # Phase 1 (in nspawn)

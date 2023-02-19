@@ -1,40 +1,60 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
-# This is an sdm plugin for: mydotfiles.  This installs my dot files to my home directory.
-#
-# The plugin is called three times: for Phase 0, Phase 1, and post-install.
-# $1 is the phase: "0", "1", or "post-install"
-# $2 is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+pluginHelp(){
+    cat <<EOF
+I: 'phase: ${phase}'
+
+This is an sdm plugin for: ${pfx}.  
+
+This pluging installs my dot files from the argument assetDir to my home directory.
+
+The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
+'\$1' is the phase: "0", "1", or "post-install"
+'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+
+Valid arguments to this plugin are:-
+    assetDir    -   Directory where local assets such as my dot files are stored.
+
+EOF
+}
 #
 # Main code for the Plugin
 #
-source $SDMPT/etc/sdm/sdm-readparams
-#
-DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"*Plugin*-${(basename $0)%%.*}"}
-phase=$1
+phase=${1}
 pfx="$(basename $0)"     #For messages
 args="$2"
 #
-plugin_getargs $pfx "$args" "|assetDir|"
-[ -f $SDMPT/etc/sdm/assets/common.sh ] || cp -va $assetDir/common.sh $SDMPT/etc/sdm/assets/common.sh
-source $SDMPT/etc/sdm/assets/common.sh
-fDebugLog 3 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/assets/common.sh" wait
+# Check that phase is set to check if we are running within sdm.  If not set 
+# or set to help, then display help text & exit.
 #
-if [ "$phase" == "0" ]
+[[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
+#
+source $SDMPT/etc/sdm/sdm-readparams
+DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
+plugin_getargs $pfx "$args" "|assetDir|"
+#
+if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
+then 
+    cp -av $assetDir/common.sh $SDMPT/etc/sdm/local-assets/common.sh
+fi
+#
+source $SDMPT/etc/sdm/local-assets/common.sh
+fDebugLog 0 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
+#
+if [[ "$phase" == "0" ]]
 then
     #
-    # In Phase 0 all references to directories in the image must be preceded by $SDMPT
+    # In Phase 0 (Mounted environment) all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 1 "* Plugin $pfx: Start Phase 0"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 0 (Mounted environment)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 2 "* Plugin $pfx: Copying plugin-assets to image"
-    cp -av --reflink=auto $assetDir/ $SDMPT/etc/sdm/assets/myassets
+#    fDebugLog 2 "* Plugin $pfx: Copying plugin-assets to image"
+#    cp -av --reflink=auto $assetDir/* $SDMPT/etc/sdm/local-assets/
     #
-    fDebugLog 3 "* Plugin $pfx: renamepi=$renamepi    myuser=$myuser"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 0" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
     #
-elif [ "$phase" == "1" ]
+elif [[ "$phase" == "1" ]]
 then
     #
     # Phase 1 (in nspawn)
@@ -44,21 +64,20 @@ then
     #
     fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
-    #logfreespace "at end of $pfx Phase 1"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait
     #
 else
     #
     # Plugin Post-install edits
     #
-    fDebugLog 1 "* Plugin $pfx: Start Phase post-install"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 2 (post-install)"
     fDebugLog 3 "$(plugin_printkeys)"
     #    
     fDebugLog 2 "> Plugin $pfx: Copying .bash_aliases > home directory"
-    cp -av --reflink=auto $SDMPT/etc/sdm/assets/myassets/.bash_aliases $SDMPT/home/$myuser/
+    cp -av --reflink=auto $SDMPT/etc/sdm/local-assets/.bash_aliases $SDMPT/home/$myuser/
     #
     fDebugLog 2 "> Plugin $pfx: Copying .bashrc > home directory"
-    cp -av --reflink=auto $SDMPT/etc/sdm/assets/myassets/.bashrc $SDMPT/home/$myuser/
+    cp -av --reflink=auto $SDMPT/etc/sdm/local-assets/.bashrc $SDMPT/home/$myuser/
     #
     fDebugLog 2 "> Plugin $pfx: Linking .Xauthority so sudo gui apps works with X11 forwarding" 
     ln -sv /home/carl/.Xauthority $SDMPT/root/.Xauthority

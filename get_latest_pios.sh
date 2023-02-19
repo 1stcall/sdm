@@ -1,5 +1,6 @@
 #!/usr/bin/env bash  
 #
+declare STARTBUILD=$(date)
 DEBUG=${DEBUG:-0}
 
 [ "$DEBUG" -ge 1 ]  && set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
@@ -17,25 +18,30 @@ while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 baseDir=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 scriptName=`basename "$(realpath ${BASH_SOURCE[0]})"`
-source "${baseDir}/common.sh"
-logname="${baseDir}/logs/scriptName.log"
+source "${baseDir}/assets/common.sh"
+logname="${baseDir}/logs/${scriptName}.log"
 #export logname
 
 function printhelp() {
-    echo $"${scriptName} $version
-Usage:
- ${scriptName} --baseUrl baseUrl --os|-o os --arch|-a arch --edition|-e edition --version|-v --help|-h --test|-t
-   Download the most recent raspios from the internet to the current directory.
+cat <<EOF  1>&2
+Usage: ${scriptName} [options]
 
-Command Switches
- --os os                Operation System to download.  Currently only raspios is supported.  Default \"raspios\".
- --edition edition      Eddition to download.  \"lite\" & \"full\" are currently supported.  Default \"lite\".
- --arch arch            Architecture to download.  \"arm\" and \arm64\" are currently supported.  Default \"arm64\".
- --baseUrl baseUrl      URL to download from.  Default \"https://downloads.raspberrypi.org/\${os}_\${edition}_\${arch}/images/\".
- --test                 Lookup and show the download URL only, without downloading anything.
- --version              Print ${scriptName} version number and exit.
- --help                 Display this help and exit." 1>&2
-
+Options:
+  -b, --baseUrl BASEURL         URL to download from.  
+                                The default is "$baseUrl".
+  -o, --os OS                   Operation System to download.  
+                                Currently only "raspios" is supported.  
+                                The default is "$os".
+  -a, --arch ARCH               Architecture to download.  
+                                "arm" and "arm64" are currently supported.  
+                                The default is "$arch".
+  -e, --edition EDITION         Eddition to download.  
+                                "lite" & "full" are currently supported.  
+                                The default is "$edition".
+  -t, --test                    Lookup and return the download URL only.
+  -h, --help                    Display this help and exit. 
+  -v, --version                 Display ${scriptName} version number and exit.
+EOF
 }
 #
 # Initialize and Parse the command
@@ -79,6 +85,7 @@ done
 
 [ $pvers -eq 1 ] && echo "${scriptName} Version $version" && exit 0
 
+fDebugLog 1 "Starting $scriptName at $STARTBUILD."
 fDebugLog 2 "DEBUG=${DEBUG} scriptName=${scriptName} LOGPREFIX=${LOGPREFIX}" wait
 fDebugLog 2 "baseUrl=${baseUrl}" 
 latestUrl=$(curl -s ${baseUrl} | sed -n 's/.*href="\([^"]*\).*/\1/p' | tail -1)
@@ -93,7 +100,7 @@ fDebugLog 1 "downloadUrl=${downloadUrl}"
 extractedFilename=${filename::-3}
 
 fDebugLog 1 "extractedFilename=${extractedFilename}"
-if [ ${testing} -eq 0 ]; then
+if [[ ${testing} -eq 0 ]]; then
     fDebugLog 2 "About to download ${downloadUrl}" yesno && curl ${downloadUrl} | unxz - > ./${extractedFilename}
 else
     echo "${downloadUrl}" 2>&1

@@ -35,8 +35,10 @@ fDebugLog 1 "callingUser=${callingUser}"
 fDebugLog 1 "baseDirectory=${baseDirectory}"
 fDebugLog 1 "hostName=${hostName}"
 
-if [ -f "${baseDirectory}/output/${hostName}-out.img" ] ; then
-    if [ -f "${baseDirectory}/output/${hostName}-out.img.old" ] ; then
+if [[ -f "${baseDirectory}/output/${hostName}-out.img" ]]
+then
+    if [[ -f "${baseDirectory}/output/${hostName}-out.img.old" ]]
+    then
         fDebugLog 1 "Removing old backup file ${baseDirectory}/output/${hostName}-out.img.old"
         rm -f "${baseDirectory}/output/${hostName}-out.img.old"
     fi
