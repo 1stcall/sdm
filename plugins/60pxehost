@@ -50,7 +50,7 @@ then
 fi
 #
 source $SDMPT/etc/sdm/local-assets/common.sh
-fDebugLog 0 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
+fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
 #
 if [[ "$phase" == "0" ]]
 then

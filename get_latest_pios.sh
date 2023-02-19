@@ -101,8 +101,10 @@ extractedFilename=${filename::-3}
 
 fDebugLog 1 "extractedFilename=${extractedFilename}"
 if [[ ${testing} -eq 0 ]]; then
-    fDebugLog 2 "About to download ${downloadUrl}" yesno && curl ${downloadUrl} | unxz - > ./${extractedFilename}
+    fDebugLog 2 "About to download ${downloadUrl}" yesno || errexit "User aborted."
+    curl ${downloadUrl} | unxz - > ./${extractedFilename}
 else
     echo "${downloadUrl}" 2>&1
 fi
+
 exit 0

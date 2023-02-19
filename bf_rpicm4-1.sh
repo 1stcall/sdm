@@ -46,7 +46,7 @@ if [[ -f "${baseDirectory}/output/${hostName}-out.img" ]] ; then
 fi
 
 fDebugLog 1 "${scriptName} is Running ${baseDirectory}/sdm --burnfile"
-fDebugLog 4 "Proceed running command." yesno 4
+fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
 sdmCmd="${baseDirectory}/sdm --burnfile ${baseDirectory}/output/${hostName}-out.img"
 sdmCmd="${sdmCmd} --host ${hostName}.1stcall.uk"
 sdmCmd="${sdmCmd} --regen-ssh-host-keys"

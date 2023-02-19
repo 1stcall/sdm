@@ -58,7 +58,7 @@ fDebugLog 3 "hostName=${hostName}"
 fDebugLog 3 "callingUser=${callingUser}"
 fDebugLog 3 "downloadUrl=${downloadUrl}"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
-fDebugLog 4 "Confirm settings." yesno 4
+fDebugLog 4 "Confirm settings." yesno 4 || errexit "User aborted."
 
 if [[ ! -d "${baseDirectory}/${baseImageDirectory}/" ]]
 then
@@ -71,7 +71,7 @@ fi
 if [[ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ]] ; then
     fDebugLog 1 "Downloading & extracting ${downloadUrl}"
     fDebugLog 1 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
-    fDebugLog 4 "Proceed with download." yesno 4
+    fDebugLog 4 "Proceed with download." yesno 4 || errexit "User aborted."
     curlOps="" && [ "$DEBUG" -ge 2 ] && curlOps="--verbose"
     su ${callingUser} --command="curl $curlOps $downloadUrl | unxz - > ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 else
@@ -97,8 +97,8 @@ sdmCmd="${sdmCmd} --apt-dist-upgrade"
 sdmCmd="${sdmCmd} --disable piwiz,swap"
 sdmCmd="${sdmCmd} --l10n"
 sdmCmd="${sdmCmd} --restart 1"
-sdmCmd="${sdmCmd} --showapt"
-sdmCmd="${sdmCmd} --showpwd"
+[[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showapt"
+[[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showpwd"
 sdmCmd="${sdmCmd} --wpa /etc/wpa_supplicant/wpa_supplicant.conf"
 sdmCmd="${sdmCmd} --batch"
 sdmCmd="${sdmCmd} --extend"
@@ -114,9 +114,9 @@ sdmCmd="${sdmCmd} --plugin 00test:assetDir=\"${baseDirectory}/assets\""
 sdmCmd="${sdmCmd} --plugin 10mydotfiles:assetDir=\"${baseDirectory}/assets\""
 sdmCmd="${sdmCmd} --plugin 20bullseye-backports:assetDir=\"${baseDirectory}/assets\""
 sdmCmd="${sdmCmd} --plugin 50btfix:assetDir=\"${baseDirectory}/assets\""
-sdmCmd="${sdmCmd} --plugin-debug"
+[[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --plugin-debug"
 fDebugLog 1 "Running ${sdmCmd}"
-fDebugLog 4 "Proceed running command." yesno 4
+fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 fDebugLog 3 "${LYELLOW}| Start Output from sdm --custmoize              |"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
@@ -127,7 +127,7 @@ fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 
 sdmCmd="${baseDirectory}/sdm --shrink ${baseDirectory}/output/1stcall.uk-base.img"
 fDebugLog 1 "Running ${sdmCmd}"
-fDebugLog 4 "Proceed running command." yesno 4
+fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
 fDebugLog 3 "${LYELLOW}----------------------------------------"
 fDebugLog 3 "${LYELLOW}| Start Output from sdm --shrink       |"
 fDebugLog 3 "${LYELLOW}----------------------------------------"
