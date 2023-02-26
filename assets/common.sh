@@ -24,6 +24,11 @@ declare LOGPREFIX=${LOGPREFIX:-${scriptName%%.*}}
 #
 declare callingUser=$(who am i | awk '{print $1}')
 #
+teeCmd="tee";         [[ $DEBUG -ge 3 ]] && teeCmd="tee"
+cpCmd="cp -a --reflink=auto";     [[ $DEBUG -ge 3 ]] && cpCmd="$cpCmd --verbose"
+mvCmd="mv";                       [[ $DEBUG -ge 3 ]] && mvCmd="$mvCmd --verbose"
+mkdirCmd="mkdir -p";              [[ $DEBUG -ge 3 ]] && mkdirCmd="$mkdirCmd --verbose"
+#
 function fRunAs(){
     local slCmdToRun="${1:-:}"
     local slUserToRunAs="${2:-${callingUser}}"
@@ -31,8 +36,8 @@ function fRunAs(){
     su ${callingUser} --command="${slCmdToRun}"
     return ${!}
 }
-declare -fx fRunAs
-#
+#declare -fx fRunAs
+#   
 debug(){
     while read line
     do
@@ -45,14 +50,14 @@ log(){
     LOGMG="${1}"
     LOGLVL="${2:-0}"
     case  ${LOGLVL} in 
-        0)  LOGCOLOR=$LGREEN ;;
-        1)  LOGCOLOR=$GRAY ;;
-        2)  LOGCOLOR=$LCYAN ;;
-        3)  LOGCOLOR=$CYAN ;;
-        4)  LOGCOLOR=$LYELLOW ;;
-        5)  LOGCOLOR=$YELLOW ;;
-        6)  LOGCOLOR=$LMAGENTA ;;
-        7)  LOGCOLOR=$MAGENTA ;;
+        0)  LOGCOLOR=$GRAY ;;
+        1)  LOGCOLOR=$LCYAN ;;
+        2)  LOGCOLOR=$CYAN ;;
+        3)  LOGCOLOR=$LYELLOW ;;
+        4)  LOGCOLOR=$YELLOW ;;
+        5)  LOGCOLOR=$LMAGENTA ;;
+        6)  LOGCOLOR=$MAGENTA ;;
+        7)  LOGCOLOR=$LRED ;;
         *)  LOGCOLOR=$RED;;
     esac
 

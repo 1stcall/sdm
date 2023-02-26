@@ -1,14 +1,13 @@
-#!/usr/bin/env bash  
+#!/usr/bin/env bash
 #
-declare STARTBUILD=$(date)
-DEBUG=${DEBUG:-0}
-
-[ "$DEBUG" -ge 1 ]  && set -o errtrace                                     # If set, the ERR trap is inherited by shell functions.
-[ "$DEBUG" -ge 1 ]  && set -o errexit                                      # Exit immediately if a command exits with a non-zero status.
-[ "$DEBUG" -ge 1 ]  && set -o nounset                                      # Treat unset variables as an error when substituting.
-[ "$DEBUG" -ge 1 ]  && set -o pipefail                                     # The return value of a pipeline is the status of the last command to exit with
-[ "$DEBUG" -ge 11 ] && set -x                                               # Debugging
-[ "$DEBUG" -ge 1 ]  && export DEBUG
+declare DEBUG=${DEBUG:-0}
+[ "$DEBUG" -ge 10 ]  && set -o errtrace         # If set, the ERR trap is inherited by shell functions.
+[ "$DEBUG" -ge 10 ]  && set -o errexit          # Exit immediately if a command exits with a non-zero status.
+[ "$DEBUG" -ge 10 ]  && set -o nounset          # Treat unset variables as an error when substituting.
+[ "$DEBUG" -ge 10 ]  && set -o pipefail         # The return value of a pipeline is the status of the last command to exit with
+                                                # a non-zero status, or zero if no command exited with a non-zero status.
+[ "$DEBUG" -ge 20 ] && set -x                   
+[ "$DEBUG" -ge 1 ]  && declare -x DEBUG         # Debugging 1=extra logging, 2= verbose to commands, 5= pauses, 11= set -x
 #
 SOURCE=${BASH_SOURCE[0]}
 while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -47,7 +46,7 @@ EOF
 # Initialize and Parse the command
 #
 #
-version="V0.0.1dev"
+version="V0.1.1dev"
 #
 # Set command line defaults
 #
