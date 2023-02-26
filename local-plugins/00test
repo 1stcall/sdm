@@ -8,7 +8,7 @@ This is an sdm plugin for: ${pfx}.  This is a test plugin to experiment with cod
 
 The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
 '\$1' is the phase: "0", "1", or "post-install"
-'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...4
 
 Valid arguments to this plugin are:-
     assetDir    -   Directory where local assets such as common.sh are stored.
@@ -29,16 +29,18 @@ args="$2"
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
 source $SDMPT/etc/sdm/sdm-readparams
-DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
-plugin_getargs $pfx "$args" "|assetDir|"
+#DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
+plugin_getargs $pfx "$args" "|assetDir|DEBUG|LOGPREFIX|"
 #
+copiedCommon=0
 if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
-then 
-    cp -av $assetDir/common.sh $SDMPT/etc/sdm/local-assets/common.sh
+then
+    copiedCommon=1
+    cp -av $assetDir/common.sh $SDMPT/etc/sdm/local-assets/common.sh && copiedCommon=3
 fi
 #
 source $SDMPT/etc/sdm/local-assets/common.sh
-fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
+fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno 4
 #
 if [[ "$phase" == "0" ]]
 then
@@ -49,7 +51,9 @@ then
     fDebugLog 3 "$(plugin_printkeys)"
     #
     fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}  -   myuser=${myuser}  -   callingUser=${callingUser}  -   USER=${USER}"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
+    fDebugLog 3 "* Plugin $pfx: DEBUG=${DEBUG}  -   scriptName=${scriptName}  -   LOGPREFIX=${LOGPREFIX}"
+    fDebugLog 3 "* Plugin $pfx: custom1=${custom1}  -  custom2=${custom2}"
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait 4
     #
 elif [[ "$phase" == "1" ]]
 then
@@ -60,9 +64,10 @@ then
     fDebugLog 3 "$(plugin_printkeys)"
     #
     fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}  -   myuser=${myuser}  -   callingUser=${callingUser}  -   USER=${USER}"
+    fDebugLog 3 "* Plugin $pfx: DEBUG=${DEBUG}  -   scriptName=${scriptName}  -   LOGPREFIX=${LOGPREFIX}"
     #
     #logfreespace "at end of $pfx Phase 1 (in nspawn)"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait 4
     #
 else
     #
@@ -72,6 +77,7 @@ else
     fDebugLog 3 "$(plugin_printkeys)"
     #    
     fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}  -   myuser=${myuser}  -   callingUser=${callingUser}  -   USER=${USER}"
+    fDebugLog 3 "* Plugin $pfx: DEBUG=${DEBUG}  -   scriptName=${scriptName}  -   LOGPREFIX=${LOGPREFIX}"
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" wait 4
 fi

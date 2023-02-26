@@ -28,8 +28,8 @@ args="$2"
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
 source $SDMPT/etc/sdm/sdm-readparams
-DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
-plugin_getargs $pfx "$args" "|assetDir|"
+#DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
+plugin_getargs $pfx "$args" "|assetDir|DEBUG|LOGPREFIX|"
 #
 if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
 then 
@@ -44,17 +44,17 @@ then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 1 "* Plugin $pfx: Start Phase 0"
+    fDebugLog 1 "* Plugin $pfx: Start Phase 0 (Mounted environment)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
     fDebugLog 2 "* Plugin $pfx: Enabling net forward."
-    cp -av --reflink=auto $SDMPT/etc/sysctl.conf $SDMPT/etc/sysctl.conf.orig  
+    $cpCmd $SDMPT/etc/sysctl.conf $SDMPT/etc/sysctl.conf.orig  
     cat $SDMPT/etc/sysctl.conf | \
         sed 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' | \
         sed 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' \
-        | tee $SDMPT/etc/sysctl.conf
+        | "$teeCmd" $SDMPT/etc/sysctl.conf
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 0" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
     #
 elif [[ "$phase" == "1" ]]
 then
@@ -65,13 +65,19 @@ then
     fDebugLog 3 "$(plugin_printkeys)"
     #
     fDebugLog 2 "* Plugin $pfx: Enabling net forward."
-    cp -av --reflink=auto $SDMPT/etc/sysctl.conf $SDMPT/etc/sysctl.conf.orig  
+    fDebugLog 3 "teeCmd=$teeCmd" wait
+
+    $cpCmd $SDMPT/etc/sysctl.conf $SDMPT/etc/sysctl.conf.orig  
     cat $SDMPT/etc/sysctl.conf | \
         sed 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' | \
         sed 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' \
-        | tee $SDMPT/etc/sysctl.conf
+        | $teeCmd $SDMPT/etc/sysctl.conf
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1" wait
+    fDebugLog 3 "teeCmd=$teeCmd" yesno 5
+    fDebugLog 2 "> Plugin $pfx: Installing & enabling iptables-persistent"
+    doaptrpterror "install --no-install-recommends -y iptables-persistent" "${showapt}"
+    
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait 4
     #
 else
     #
@@ -80,8 +86,12 @@ else
     fDebugLog 1 "* Plugin $pfx: Start Phase post-install"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 2 "* Plugin $pfx: Nothing to do"
+    fDebugLog 2 "> Plugin $pfx: Configuring iptable rules."
+    #iptables --verbose -A FORWARD -i eth1 -o eth0 -j ACCEPT
+    cp -av $SDMPT/etc/sdm/local-assets/rules.v4 $SDMPT/etc/iptables/
+
+#    fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait 4
     #
 fi

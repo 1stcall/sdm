@@ -28,8 +28,8 @@ args="$2"
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
 source $SDMPT/etc/sdm/sdm-readparams
-DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
-plugin_getargs $pfx "$args" "|assetDir|"
+#DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
+plugin_getargs $pfx "$args" "|assetDir|DEBUG|LOGPREFIX|"
 #
 if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
 then 
@@ -44,16 +44,16 @@ then
     #
     # In Phase 0 all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 1  "* Plugin $pfx: Start Phase 0" wait
+    fDebugLog 1  "* Plugin $pfx: Start Phase 0 (Mounted environment)" wait
     fDebugLog 3 "$(plugin_printkeys)"
     #
     fDebugLog 2 "* Plugin $pfx: Creating directory bluetooth.service.d/" 
-    mkdir -pv $SDMPT/etc/systemd/system/bluetooth.service.d/
+    $mkdirCmd $SDMPT/etc/systemd/system/bluetooth.service.d/
     #
     fDebugLog 2 "* Plugin $pfx: Copying $assetDir/override.conf > $SDMPT/etc/systemd/system/bluetooth.service.d/override.conf"
-    cp -av --reflink=auto $assetDir/override.conf $SDMPT/etc/systemd/system/bluetooth.service.d/override.conf
+    $cpCmd $assetDir/override.conf $SDMPT/etc/systemd/system/bluetooth.service.d/override.conf
     #
-    fDebugLog 1  "* Plugin $pfx: Complete Phase 0" wait
+    fDebugLog 1  "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
     #
 elif [[ "$phase" == "1" ]]
 then
@@ -65,7 +65,7 @@ then
     #
     fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
-    fDebugLog 1  "* Plugin $pfx: Complete Phase 1" wait
+    fDebugLog 1  "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait
     #
 else
     #
