@@ -16,7 +16,7 @@ declare DEBUG=${DEBUG:-0}
 declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev/sdm}
 #declare baseImage="2022-09-22-raspios-bullseye-arm64-lite.img"
 #declare baseImageDirectory="baseos"
-declare hostName="rpi4b-1"
+declare hostName="rpi4b-4"
 #
 declare STARTBUILD=$(date)
 declare STARTSEC=$(date +%s)
@@ -57,7 +57,6 @@ sdmCmd="${sdmCmd} --regen-ssh-host-keys"
 sdmCmd="${sdmCmd} --logwidth 999"
 sdmCmd="${sdmCmd} --apt-dist-upgrade"
 sdmCmd="${sdmCmd} --batch"
-sdmCmd="${sdmCmd} --plugin 50setnfsroot:assetDir=\"${baseDirectory}/assets\"|DEBUG=4|LOGPREFIX=${scriptName}|serialno=d21c0840"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --plugin-debug"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showapt"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showpwd"

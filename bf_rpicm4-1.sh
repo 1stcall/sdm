@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 #
-DEBUG=${DEBUG:-0}
+declare STARTSEC=$(date +%s)
+declare STARTBUILD=$(date --date="@${STARTSEC}")
+declare ENDBUILD=
+declare DEBUG=${DEBUG:-0}
 #
 [ "$DEBUG" -ge 10 ]  && set -o errtrace         # If set, the ERR trap is inherited by shell functions.
 [ "$DEBUG" -ge 10 ]  && set -o errexit          # Exit immediately if a command exits with a non-zero status.
@@ -46,24 +49,27 @@ if [[ -f "${baseDirectory}/output/${hostName}-out.img" ]] ; then
 fi
 
 fDebugLog 1 "${scriptName} is Running ${baseDirectory}/sdm --burnfile"
-fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
-sdmCmd="${baseDirectory}/sdm --burnfile ${baseDirectory}/output/${hostName}-out.img"
+fDebugLog 4 "Proceed running with running command." yesno 4 || errexit "User aborted."
+sdmCmd="${baseDirectory}/sdm"
+sdmCmd="${sdmCmd} --burnfile ${baseDirectory}/output/${hostName}-out.img"
 sdmCmd="${sdmCmd} --host ${hostName}.1stcall.uk"
 sdmCmd="${sdmCmd} --regen-ssh-host-keys"
 sdmCmd="${sdmCmd} --logwidth 999"
 sdmCmd="${sdmCmd} --apt-dist-upgrade"
-sdmCmd="${sdmCmd} --showapt"
-sdmCmd="${sdmCmd} --showpwd"
 sdmCmd="${sdmCmd} --batch"
-sdmCmd="${sdmCmd} --plugin 00test:assetDir=\"${baseDirectory}/plugins/assets\""
-sdmCmd="${sdmCmd} --plugin 30configgit:assetDir=\"${baseDirectory}/plugins/assets\""
-sdmCmd="${sdmCmd} --plugin 50enablenetfwd:assetDir=\"${baseDirectory}/plugins/assets\""
-sdmCmd="${sdmCmd} --plugin 50instlvmxfs:assetDir=\"${baseDirectory}/plugins/assets\""
-sdmCmd="${sdmCmd} --plugin 60pxehost:assetDir=\"${baseDirectory}/plugins/assets|netIface=eth1|ipAddr=192.168.1.1|dnsaddr=192.168.1.1|brdAddr=192.168.1.255|gwAddr=192.168.1.1|dhcpRange=\"192.168.1.2\,192.168.1.10\,255.255.255.0\,6h\"|tftpRootDir=/srv/netboot/tftp/|nfsRootDir=/srv/netboot/nfs/\""
-sdmCmd="${sdmCmd} --plugin 70devtools:assetDir=\"${baseDirectory}/plugins/assets\""
-sdmCmd="${sdmCmd} --plugin-debug"
-sdmCmd="${sdmCmd} --custom1=${DEBUG}"
-sdmCmd="${sdmCmd} --custom2=${scriptName%%.*}"
+sdmCmd="${sdmCmd} --dtoverlay i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host"
+sdmCmd="${sdmCmd} --dtparam i2c_vc=on"
+sdmCmd="${sdmCmd} --plugin 00test:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin 10configtxt:assetDir=\"${baseDirectory}/assets\"|DEBUG=3|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin 30configgit:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin 50enablenetfwd:assetDir=\"${baseDirectory}/assets\"|DEBUG=4|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin 50instlvmxfs:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin 60pxehost:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}|netIface=eth1|ipAddr=192.168.1.1|dnsaddr=192.168.0.1|brdAddr=192.168.1.255|gwAddr=192.168.1.1|dhcpRange=192.168.1.2\,192.168.1.10\,255.255.255.0\,6h|tftpRootDir=/srv/netboot/tftp/|nfsRootDir=/srv/netboot/nfs/"
+sdmCmd="${sdmCmd} --plugin 70devtools:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+[[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --plugin-debug"
+[[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showapt"
+[[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showpwd"
+
 sdmCmd="${sdmCmd} ${baseDirectory}/output/1stcall.uk-base.img"
 fDebugLog 1 "Running ${sdmCmd}"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
