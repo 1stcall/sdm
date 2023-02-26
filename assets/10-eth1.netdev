@@ -1,0 +1,7 @@
+[Match]
+Name=eth1
+Type=ether
+
+[Network]
+DHCP=no
+Description=LAN Interface
