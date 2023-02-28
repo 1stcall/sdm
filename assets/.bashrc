@@ -124,4 +124,4 @@ fi
 
 PATH="~/.local/usr/sbin:~/.local/sbin::~/.local/usr/bin:~/.local/bin:$PATH"
 
-IGNOREEOF=5
+IGNOREEOF=2

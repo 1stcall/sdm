@@ -30,7 +30,7 @@ args="$2"
 #
 source $SDMPT/etc/sdm/sdm-readparams
 #DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
-plugin_getargs $pfx "$args" "|assetDir|DEBUG|LOGPREFIX|serialno"
+plugin_getargs $pfx "$args" "|assetDir|DEBUG|LOGPREFIX|serialNo|"
 #
 copiedCommon=0
 if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
@@ -50,11 +50,11 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase 0 (Mounted environment)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 3 "* Plugin $pfx: serialno=$serialno"
+    fDebugLog 3 "* Plugin $pfx: serialNo=$serialNo"
     fDebugLog 3 "* Plugin $pfx: cmdline.txt :-"
-    cat $assetDir/cmdline.txt.$serialno | tee $SDMPT/boot/cmdline.txt
+    cat $assetDir/cmdline.txt.$serialNo | tee $SDMPT/boot/cmdline.txt
     fDebugLog 3 "* Plugin $pfx: fstab :-"
-    cat $assetDir/fstab.$serialno | tee $SDMPT/etc/fstab
+    cat $assetDir/fstab.$serialNo | tee $SDMPT/etc/fstab
     #
     fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait 4
     #
@@ -66,7 +66,7 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 3 "* Plugin $pfx: serialno=$serialno"
+    fDebugLog 3 "* Plugin $pfx: serialNo=$serialNo"
     fDebugLog 3 "* Plugin $pfx: cmdline.txt :-"
     cat $SDMPT/boot/cmdline.txt
     fDebugLog 3 "* Plugin $pfx: fstab :-"
@@ -81,7 +81,7 @@ else
     fDebugLog 1 "* Plugin $pfx: Start Phase Phase 2 (post-install)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 3 "* Plugin $pfx: serialno=$serialno"
+    fDebugLog 3 "* Plugin $pfx: serialNo=$serialNo"
     fDebugLog 3 "* Plugin $pfx: cmdline.txt :-"
     cat $SDMPT/boot/cmdline.txt
     fDebugLog 3 "* Plugin $pfx: fstab :-"
