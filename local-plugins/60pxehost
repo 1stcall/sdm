@@ -94,15 +94,16 @@ else
     echo "denyinterfaces pattern ${netIface}" | "$teeCmd" -a $SDMPT/etc/dhcpcd.conf
     #
     fDebugLog 2 "> Plugin $pfx: Configuring dnsmasq"
-    cat <<EOF | "$teeCmd" $SDMPT/etc/dnsmasq.conf
-interface=${netIface}
-port=0
-dhcp-range=${dhcpRange}
-log-dhcp
-enable-tftp
-tftp-root=${tftpRootDir}
-pxe-service=0,"Raspberry Pi Boot"
-EOF
+#    cat <<EOF | "$teeCmd" $SDMPT/etc/dnsmasq.conf
+#interface=${netIface}
+#port=0
+#dhcp-range=${dhcpRange}
+#log-dhcp
+#enable-tftp
+#tftp-root=${tftpRootDir}
+#pxe-service=0,"Raspberry Pi Boot"
+#EOF
+    cp -av $SDMPT/etc/sdm/local-assets/dnsmasq.* $SDMPT/etc/
     #
     fDebugLog 2 "> Plugin $pfx: Configuring systemd-networkd"
 #    cat <<EOF | "$teeCmd" $SDMPT/etc/systemd/network/10-${netIface}.netdev
