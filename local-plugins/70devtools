@@ -67,8 +67,8 @@ then
     curl -fsSL https://pkgs.tailscale.com/stable/debian/bullseye.tailscale-keyring.list | "$teeCmd" $SDMPT/etc/apt/sources.list.d/tailscale.list
     apt-get update
     #
-    fDebugLog 2 "> Plugin $pfx: Install nmap, tcpdump, tailscale, gparted, systemd-container, shellcheck"
-    doaptrpterror "install --no-install-recommends -y nmap tcpdump gparted systemd-container shellcheck" "${showapt}"
+    fDebugLog 2 "> Plugin $pfx: Install nmap, tcpdump, tailscale, gparted, systemd-container, shellcheck, jq"
+    doaptrpterror "install --no-install-recommends -y nmap tcpdump gparted systemd-container shellcheck jq" "${showapt}"
     #
     fDebugLog 3 $(logfreespace "at end of $pfx Phase 1 (in nspawn)")
     #
