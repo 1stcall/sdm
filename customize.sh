@@ -124,17 +124,6 @@ fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 fDebugLog 3 "${LYELLOW}| End Output from sdm --custmoize                |"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 
-sdmCmd="${baseDirectory}/sdm --shrink ${baseDirectory}/output/1stcall.uk-base.img"
-fDebugLog 1 "Running ${sdmCmd}"
-fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
-fDebugLog 3 "${LYELLOW}----------------------------------------"
-fDebugLog 3 "${LYELLOW}| Start Output from sdm --shrink       |"
-fDebugLog 3 "${LYELLOW}----------------------------------------"
-${sdmCmd}
-fDebugLog 3 "${LYELLOW}----------------------------------------"
-fDebugLog 3 "${LYELLOW}| End Output from sdm --shrink         |"
-fDebugLog 3 "${LYELLOW}----------------------------------------"
-
 ENDBUILD=$(date)
 fDebugLog 1 "${scriptName} started at ${STARTBUILD} and compleated at ${ENDBUILD}."
 echo 1>&2 "${scriptName} completed in $(displaytime $(( $(date +%s) - $STARTSEC )))"

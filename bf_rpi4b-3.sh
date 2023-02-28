@@ -17,6 +17,8 @@ declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev
 #declare baseImage="2022-09-22-raspios-bullseye-arm64-lite.img"
 #declare baseImageDirectory="baseos"
 declare hostName="rpi4b-3"
+declare serialNo="9fb41f35"
+declare ipAddress="192.168.1.13"
 #
 declare STARTBUILD=$(date)
 declare STARTSEC=$(date +%s)
@@ -57,11 +59,12 @@ sdmCmd="${sdmCmd} --regen-ssh-host-keys"
 sdmCmd="${sdmCmd} --logwidth 999"
 sdmCmd="${sdmCmd} --apt-dist-upgrade"
 sdmCmd="${sdmCmd} --batch"
+sdmCmd="${sdmCmd} --plugin 50setnfsroot:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}|serialNo=${serialNo}"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --plugin-debug"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showapt"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showpwd"
-
 sdmCmd="${sdmCmd} ${baseDirectory}/output/1stcall.uk-base.img"
+
 fDebugLog 1 "Running ${sdmCmd}"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 fDebugLog 3 "${LYELLOW}| Start Output from sdm --burnfile               |"
@@ -70,6 +73,17 @@ ${sdmCmd}
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 fDebugLog 3 "${LYELLOW}| End Output from sdm --burnfile                 |"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+
+sdmCmd="${baseDirectory}/sdm --shrink ${baseDirectory}/output/${hostName}-out.img"
+fDebugLog 1 "Running ${sdmCmd}"
+fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
+fDebugLog 3 "${LYELLOW}----------------------------------------"
+fDebugLog 3 "${LYELLOW}| Start Output from sdm --shrink       |"
+fDebugLog 3 "${LYELLOW}----------------------------------------"
+${sdmCmd}
+fDebugLog 3 "${LYELLOW}----------------------------------------"
+fDebugLog 3 "${LYELLOW}| End Output from sdm --shrink         |"
+fDebugLog 3 "${LYELLOW}----------------------------------------"
 
 ENDBUILD=$(date)
 fDebugLog 1 "${scriptName} started at ${STARTBUILD} and compleated at ${ENDBUILD}."
