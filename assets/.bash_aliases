@@ -1,4 +1,4 @@
-alias ll='ls -lahtr --group-directories-first'
+alias ll='ls -lAhtr --group-directories-first'
 alias histgrep='history | grep'
 alias sudo='sudo '
 alias apt='sudo $(which apt)'
@@ -8,6 +8,7 @@ alias poweroff='sudo $(which poweroff)'
 alias grep='grep --color'
 alias higrep='grep --color=always -e "^" -e '
 alias trashboot='sudo /home/$USER/.local/usr/bin/trashboot.sh'
+alias iptables='sudo $(which iptables)'
 
 function negrep(){
 #	set -x
