@@ -38,6 +38,32 @@ See below for plugin-specific examples and important information.
 
 sdm-plugin-template can be used to build your own plugin. It contains some code in Phase 0 demonstrating some of the things you can do with the *plugin_getargs* function and how to access the results.
 
+### addusers
+
+addusers can be used to add user accounts quickly and easily, either during IMG customization or burning a disk. The user information can be specified in the plugin arguments, or an argument pointing to a list of users to add can be used. addusers will log the added account information to a file on the host if directed to do so.
+
+#### Arguments
+
+* **username** &mdash; Specifies the username to add
+* **password** &mdash; Specifies the password for the new username. If no password is provided, no password is set for the new user
+* **uid** &mdash; Specifies the UID for the new user. If not provided, the system will assign an unused uid
+* **groups** &mdash; Specifies the list of groups to be added to the new user. If not specified, the groups specified by the command line `--groups` switch are used. The default is "dialout,cdrom,floppy,audio,video,plugdev,users,adm,sudo,users,input,netdev,spi,i2c,gpio"
+* **homedir** &mdash; Specifies the home directory for the new user. If not specified, /home/$username is used
+* **nohomedir** &mdash; if `nohomedir=y` is specified, no home directory will be created for the user, even if `homedir` is provided
+* **nosudo** &mdash; If `nosudo=y` is specified, the user will not be enabled to use the `sudo` command. In other words, `sudo` is enabled by default
+* **samba** &mdash; Add the username to the samba password file. If `smbpasswd` is not specified, `password` will be used. If neither is provided, the user will not be added to the samba password file
+* **smbpasswd** &mdash; Use this password for samba for the user instead of the user's password
+* **userlist** &mdash; The /full/path/to/logfile of a list of users to add. See below.
+* **log** &mdash; The /full/path/to/file of a file on the host OS where sdm is running to log all users added via the addusers plugin
+
+The `userlist=/full/path/to/logfile` option points to a file that consists of one line per user in the format:
+```
+username=theusername|password=thepassword|homedir=homedir|...
+```
+Only arguments that are set for a user need be specified, and they are processed as described above.
+
+NOTE: If you do not want any user's passwords to be visible in /etc/sdm/history, use `userlist`, rather than `--plugin addusers` on the command line.
+
 ### apt-cacher-ng
 
 apt-cacher-ng installs the RasPiOS apt-cacher-ng service into the IMG or onto the SSD/SD card (If used with `--burn`).
@@ -75,6 +101,19 @@ btwifiset is a service that enables WiFi SSID and password configuration over Bl
 * **timeout** &mdash; After *timeout* seconds the btwifiset service will exit [Default: *15 minutes*]
 * **logfile** &mdash; Full path to btwifiset log file [Default: *Writes to syslog*]
 
+### burnpwd
+
+burnpwd enables you to defer setting the password on an account until the SD card is actually burned,. To use burnpwd, use the `--nopassword` switch during customization, and add `--burnpwd username:"arguments"` to the sdm burn command. burnpwd can either prompt for the password, or it can generate a random password.
+
+The password is not stored in an unencrypted form anywhere on the burned output device. You can use the *log* argument to burnpwd to direct burnpwd to log passwords **on the host**, which is handy, especially if you have burnpwd generate a random password.
+
+#### Arguments
+
+* **user** &mdash; The username to set the password for. The user must already exist in the IMG. If you need to do multiple users, add the `--burnpwd` switch multiple times.
+* **method** &mdash; Specifies the method to obtain the password. *prompt* will prompt for the password; *random* will generate a random password
+* **length** &mdash; Used with **method=random** to specify the length of the generated password. Default:20
+* **log** &mdash; Specifies the /full/path/to/logfile on the host where the passwords are stored. This is extremely important if you use **method=random**, as the password is not stored anywhere else!
+
 ### clockfake
 
 The fake-hwclock provided with RasPiOS runs hourly as a cron job. clockfake does the same thing as fake-hwclock, but you control the interval, and it's always running. Lower overhead, less processes activated, and more control. Life is good.
@@ -95,6 +134,15 @@ imon installs an <a href="https://github.com/gitbls/imon">Internet Monitor</a> t
 #### Arguments
 
 There are no `--plugin` arguments for imon
+
+### knockd
+
+knockd installs the knockd service and <a href="https://github.com/gitbls/pktables">pktables</a> to facilitate easier knockd iptables management.
+
+#### Arguments
+
+* **config** &mdash; Full path to your knockd.conf. If **config** isn't provided, /etc/knockd.conf will be the standard knockd.conf
+* **localsrc** &mdash; Locally accessible directory where pktables, knockd-helper, and knockd.service can be found, instead of downloading them from GitHub. If there is a knockd.conf in this directory, it will be used, unless overridden with the **config** argument
 
 ### pistrong
 
