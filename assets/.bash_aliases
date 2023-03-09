@@ -24,3 +24,8 @@ function negrep(){
 #	set +x
 }
 export -f negrep
+
+function qqbc(){
+	echo "scale=${2:-2}; $1" | bc -l
+}
+export -f qqbc
