@@ -73,11 +73,11 @@ then
         sed 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' \
         | $teeCmd $SDMPT/etc/sysctl.conf
     #
-    fDebugLog 3 "teeCmd=$teeCmd" yesno 5
+    fDebugLog 3 "teeCmd=$teeCmd" yesno
     fDebugLog 2 "> Plugin $pfx: Installing & enabling iptables-persistent"
     doaptrpterror "install --no-install-recommends -y iptables-persistent" "${showapt}"
     
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)"
     #
 else
     #
@@ -92,6 +92,6 @@ else
 
 #    fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install"
     #
 fi

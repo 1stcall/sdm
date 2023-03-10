@@ -67,7 +67,7 @@ then
     fDebugLog 3 "* Plugin $pfx: DEBUG=${DEBUG}  -   scriptName=${scriptName}  -   LOGPREFIX=${LOGPREFIX}"
     #
     #logfreespace "at end of $pfx Phase 1 (in nspawn)"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)"
     #
 else
     #
@@ -79,5 +79,5 @@ else
     fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}  -   myuser=${myuser}  -   callingUser=${callingUser}  -   USER=${USER}"
     fDebugLog 3 "* Plugin $pfx: DEBUG=${DEBUG}  -   scriptName=${scriptName}  -   LOGPREFIX=${LOGPREFIX}"
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)"
 fi

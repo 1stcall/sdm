@@ -40,7 +40,7 @@ then
 fi
 #
 source $SDMPT/etc/sdm/local-assets/common.sh
-fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno 4
+fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno
 #
 if [[ "$phase" == "0" ]]
 then
@@ -56,7 +56,7 @@ then
     fDebugLog 3 "* Plugin $pfx: fstab :-"
     cat $assetDir/fstab.$serialNo | tee $SDMPT/etc/fstab
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)"
     #
 elif [[ "$phase" == "1" ]]
 then
@@ -72,7 +72,7 @@ then
     fDebugLog 3 "* Plugin $pfx: fstab :-"
     cat $SDMPT/etc/fstab
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)"
     #
 else
     #
@@ -87,5 +87,5 @@ else
     fDebugLog 3 "* Plugin $pfx: fstab :-"
     cat $SDMPT/etc/fstab
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)"
 fi

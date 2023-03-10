@@ -40,7 +40,7 @@ then
 fi
 #
 source $SDMPT/etc/sdm/local-assets/common.sh
-fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno 4
+fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno
 #
 if [[ "$phase" == "0" ]]
 then
@@ -54,7 +54,7 @@ then
     cp -v $SDMPT/boot/config.txt $SDMPT/boot/config.txt.orig
     sed -e "/\[cm4\]/,/^[[:blank:]]*$/{" -e "\|^[[:blank:]]*$|s|.*|dtoverlay=i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host\ndtparam=i2c_vc=on\n&|g" -e "}" $SDMPT/boot/config.txt.orig | ${teeCmd} $SDMPT/boot/config.txt
 
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)"
     #
 elif [[ "$phase" == "1" ]]
 then
@@ -68,7 +68,7 @@ then
     fDebugLog 3 "* Plugin $pfx: DEBUG=${DEBUG}  -   scriptName=${scriptName}  -   LOGPREFIX=${LOGPREFIX}"
     #
     #logfreespace "at end of $pfx Phase 1 (in nspawn)"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)"
     #
 else
     #
@@ -80,5 +80,5 @@ else
     fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}  -   myuser=${myuser}  -   callingUser=${callingUser}  -   USER=${USER}"
     fDebugLog 3 "* Plugin $pfx: DEBUG=${DEBUG}  -   scriptName=${scriptName}  -   LOGPREFIX=${LOGPREFIX}"
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)"
 fi

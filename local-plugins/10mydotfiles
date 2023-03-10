@@ -52,7 +52,7 @@ then
     fDebugLog 2 "* Plugin $pfx: Copying local assets to image"
     $cpCmd $assetDir/. $SDMPT/etc/sdm/local-assets
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)"
     #
 elif [[ "$phase" == "1" ]]
 then
