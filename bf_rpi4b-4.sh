@@ -14,8 +14,6 @@ declare DEBUG=${DEBUG:-0}
 [ "$DEBUG" -ge 1 ]  && declare -x DEBUG         # Debugging 1=extra logging, 2= verbose to commands, 5= pauses, 11= set -x
 #
 declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev/sdm}
-#declare baseImage="2022-09-22-raspios-bullseye-arm64-lite.img"
-#declare baseImageDirectory="baseos"
 declare hostName="rpi4b-4"
 declare serialNo="9210668e"
 declare ipAddress="192.168.1.14"

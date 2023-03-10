@@ -4,6 +4,7 @@ declare STARTSEC=$(date +%s)
 declare STARTBUILD=$(date --date="@${STARTSEC}")
 declare ENDBUILD=
 declare DEBUG=${DEBUG:-0}
+declare BASEIMG=${BASEIMG:-""}
 #
 [ "$DEBUG" -ge 10 ]  && set -o errtrace         # If set, the ERR trap is inherited by shell functions.
 [ "$DEBUG" -ge 10 ]  && set -o errexit          # Exit immediately if a command exits with a non-zero status.
@@ -15,7 +16,7 @@ declare DEBUG=${DEBUG:-0}
 #
 declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev/sdm}
 declare baseImageDirectory      && baseImageDirectory=${baseImageDirectory:-"baseos"}
-declare baseImage               #&& baseImage=${baseImage:-2022-09-22-raspios-bullseye-arm64-lite.img}
+declare baseImage               
 declare baseUrl                 && baseUrl=${baseUrl:-"https://downloads.raspberrypi.org/"}
 declare hostName                && hostName=${hostName:-"rpicm4-1"}
 declare downloadUrl
@@ -32,17 +33,22 @@ scriptName=${scriptName%%.*}
 source "${baseDir}/assets/common.sh"
 logname="${baseDir}/logs/${scriptName}.log"
 #
-fDebugLog 2 "Starting $scriptName at $STARTBUILD.  Now calling get_latest_pios -t to get the download link."
-fDebugLog 3 "${LYELLOW}--------------------------------------------------"
-fDebugLog 3 "${LYELLOW}| Start Output from get_latest_pios.sh --test    |"
-fDebugLog 3 "${LYELLOW}--------------------------------------------------"
-downloadUrl="$(${baseDirectory}/get_latest_pios.sh --test)"
-fDebugLog 3 "${LYELLOW}--------------------------------------------------"
-fDebugLog 3 "${LYELLOW}| End Output from get_latest_pios.sh --test      |"
-fDebugLog 3 "${LYELLOW}--------------------------------------------------"
-baseImage=$(echo ${downloadUrl} | sed 's:.*/::')
-#baseImage=${baseImage%%.*}.img
-baseImage=${baseImage::-3}
+fDebugLog 2 "Starting $scriptName at $STARTBUILD."
+if [[ $BASEIMG == "" ]]; then
+    fDebugLog 2 "Now calling get_latest_pios -t to get the download link."
+    fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+    fDebugLog 3 "${LYELLOW}| Start Output from get_latest_pios.sh --test    |"
+    fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+    downloadUrl="$(${baseDirectory}/get_latest_pios.sh --test)"
+    fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+    fDebugLog 3 "${LYELLOW}| End Output from get_latest_pios.sh --test      |"
+    fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+    baseImage=$(echo ${downloadUrl} | sed 's:.*/::')
+    baseImage=${baseImage::-3}
+else
+    fDebugLog 2 "Skipping get_latest_pios because BASEIMG is set"
+    baseImage=${BASEIMG}
+fi
 
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 fDebugLog 3 "${LYELLOW}| Running with the following settings. :-        |"
@@ -106,11 +112,14 @@ sdmCmd="${sdmCmd} --poptions apps"
 sdmCmd="${sdmCmd} --apps @${baseDirectory}/assets/1stcallApps.list"
 sdmCmd="${sdmCmd} --rename-pi carl"
 sdmCmd="${sdmCmd} --password-pi letmein123"
+#sdmCmd="${sdmCmd} --user carl"
+#sdmCmd="${sdmCmd} --password-user letmein123"
 #sdmCmd="${sdmCmd} --custom1=${DEBUG}"
 #sdmCmd="${sdmCmd} --custom2=${scriptName}"
 sdmCmd="${sdmCmd} --plugin apt-file"
-sdmCmd="${sdmCmd} --plugin 00test:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+#sdmCmd="${sdmCmd} --plugin 00test:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin 10mydotfiles:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+#sdmCmd="${sdmCmd} --plugin 20bookworm-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin 20bullseye-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin 50btfix:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --plugin-debug"

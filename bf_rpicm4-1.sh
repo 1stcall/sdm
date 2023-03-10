@@ -14,8 +14,6 @@ declare DEBUG=${DEBUG:-0}
 [ "$DEBUG" -ge 1 ]  && declare -x DEBUG         # Debugging 1=extra logging, 2= verbose to commands, 5= pauses, 11= set -x
 #
 declare baseDirectory           && baseDirectory=${baseDirectory:-/home/carl/dev/sdm}
-#declare baseImage="2022-09-22-raspios-bullseye-arm64-lite.img"
-#declare baseImageDirectory="baseos"
 declare hostName="rpicm4-1"
 #
 declare STARTBUILD=$(date)
@@ -59,13 +57,14 @@ sdmCmd="${sdmCmd} --apt-dist-upgrade"
 sdmCmd="${sdmCmd} --batch"
 sdmCmd="${sdmCmd} --dtoverlay i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host"
 sdmCmd="${sdmCmd} --dtparam i2c_vc=on"
-sdmCmd="${sdmCmd} --plugin 00test:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+#sdmCmd="${sdmCmd} --plugin 00test:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin 10configtxt:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin 30configgit:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin 50enablenetfwd:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin 50instlvmxfs:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin 60pxehost:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}|netIface=eth1|ipAddr=192.168.1.1|dnsaddr=192.168.0.1|brdAddr=192.168.1.255|gwAddr=192.168.1.1|dhcpRange=192.168.1.2\,192.168.1.10\,255.255.255.0\,6h|tftpRootDir=/srv/netboot/tftp/|nfsRootDir=/srv/netboot/nfs/"
-sdmCmd="${sdmCmd} --plugin 70devtools:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+#sdmCmd="${sdmCmd} --plugin 70devtools_bookworm:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin 70devtools_bullseye:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --plugin-debug"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showapt"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showpwd"
