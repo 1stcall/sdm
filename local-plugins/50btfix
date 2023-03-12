@@ -50,8 +50,8 @@ then
     fDebugLog 2 "* Plugin $pfx: Creating directory bluetooth.service.d/" 
     $mkdirCmd $SDMPT/etc/systemd/system/bluetooth.service.d/
     #
-    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/override.conf > $SDMPT/etc/systemd/system/bluetooth.service.d/override.conf"
-    $cpCmd $assetDir/override.conf $SDMPT/etc/systemd/system/bluetooth.service.d/override.conf
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/blutooth-override.conf > $SDMPT/etc/systemd/system/bluetooth.service.d/override.conf"
+    $cpCmd $assetDir/blutooth-override.conf $SDMPT/etc/systemd/system/bluetooth.service.d/override.conf
     #
     fDebugLog 1  "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
     #

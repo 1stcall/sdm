@@ -53,8 +53,17 @@ then
     fDebugLog 2 "* Plugin $pfx: Copying $assetDir/backports.list > $SDMPT/etc/apt/sources.list.d/"
     $cpCmd $assetDir/bookworm-backports.list $SDMPT/etc/apt/sources.list.d/
     #
-    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/90_backports > $SDMPT/etc/apt/preferences.d/"
-    $cpCmd $assetDir/90_backports $SDMPT/etc/apt/preferences.d/
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/bookworm-raspi.list > $SDMPT/etc/apt/sources.list.d/"
+    $cpCmd $assetDir/bookworm-raspi.list $SDMPT/etc/apt/sources.list.d/
+    #
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/bullseye-sources.list > $SDMPT/etc/apt/sources.list.d/"
+    $cpCmd $assetDir/bullseye-sources.list $SDMPT/etc/apt/sources.list.d/
+    #
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/bookwork-sources.list > $SDMPT/etc/apt/sources.list"
+    $cpCmd $assetDir/bookworm-sources.list $SDMPT/etc/apt/sources.list
+    #
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/bookworm-90_backports > $SDMPT/etc/apt/preferences.d/90_backports"
+    $cpCmd $assetDir/bookworm-90_backports $SDMPT/etc/apt/preferences.d/90_backports
     #
     fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
     #

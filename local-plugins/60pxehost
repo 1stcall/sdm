@@ -64,6 +64,20 @@ then
     fDebugLog 1 "* Plugin $pfx: Updating fstab from ${assetDir}/my-fstab"
     cat ${assetDir}/my-fstab | "$teeCmd" -a $SDMPT/etc/fstab
     #
+    fDebugLog 2 "* Plugin $pfx: Creating directory dnsmasq.service.d/" 
+    $mkdirCmd $SDMPT/etc/systemd/system/dnsmasq.service.d/
+
+    fDebugLog 2 "* Plugin $pfx: Creating directory nfs-blkmap.service.d/" 
+    $mkdirCmd $SDMPT/etc/systemd/system/nfs-blkmap.service.d/
+
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/dnsmasq-override.conf > $SDMPT/etc/systemd/system/dnsmasq.service.d/override.conf"
+    $cpCmd $assetDir/dnsmasq-override.conf $SDMPT/etc/systemd/system/dnsmasq.service.d/override.conf
+    #
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/nfs-blkmap-override.conf > $SDMPT/etc/systemd/system/nfs-blkmap.service.d/override.conf"
+    $cpCmd $assetDir/nfs-blkmap-override.conf $SDMPT/etc/systemd/system/nfs-blkmap.service.d/override.conf
+    #                dnsmasq-override.conf                            /etc/systemd/system/dnsmasq.service.d/
+    fDebugLog 1 "?" yesno 4
+    #
     fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
     #
 elif [[ "$phase" == "1" ]]

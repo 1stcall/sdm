@@ -88,7 +88,7 @@ else
     #
     fDebugLog 2 "> Plugin $pfx: Configuring iptable rules."
     #iptables --verbose -A FORWARD -i eth1 -o eth0 -j ACCEPT
-    cp -av $SDMPT/etc/sdm/local-assets/rules.v4 $SDMPT/etc/iptables/
+    cp -av $SDMPT/etc/sdm/local-assets/rules.v{4,6} $SDMPT/etc/iptables/
 
 #    fDebugLog 2 "* Plugin $pfx: Nothing to do"
     #
