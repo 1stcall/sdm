@@ -41,14 +41,18 @@ then
 fi
 #
 source $SDMPT/etc/sdm/local-assets/common.sh || exit 1
-fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno
+fDebugLog 2 "* Plugin ${pfx}: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno
+set -x
+echo "pfx:$pfx" 1>&2
 #
 if [[ "$phase" == "0" ]]
 then
     #
     # In Phase 0 (Mounted environment) all references to directories in the image must be preceded by $SDMPT
     #
-    fDebugLog 1 "* Plugin $pfx: Start Phase."
+    echo "pfx:$pfx" 1>&2
+    set +x
+    fDebugLog 1 "* Plugin ${pfx}: Start Phase."
     fDebugLog 3 "$(plugin_printkeys)"
     #
     fDebugLog 2 "Plugin $pfx: Setting up k3s."
@@ -74,7 +78,8 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase."
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 2 "Plugin $pfx: Nothing to do."
+    fDebugLog 2 "Plugin $pfx: Installing k3s from https://get.k3s.io."
+    curl -sfL https://get.k3s.io | INSTALL_K3S_SKIP_START=True INSTALL_K3S_EXEC=server INSTALL_K3S_CHANNEL=latest sh -
     #
     fDebugLog 1 "* Plugin $pfx: Complete Phase." yesno
     #
