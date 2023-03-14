@@ -2,5 +2,4 @@ zram-tools
 command-not-found bash-completion 
 tmux 
 apt-transport-https
-systemd systemd-resolved
-systemd-container
+acl
