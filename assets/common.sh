@@ -99,7 +99,7 @@ function fDebugLog() {
     DEBUG=${DEBUG:-0}
     OLDIFS=${IFS}
     IFS=''
-    pfx="${scriptName:-"NO SCRIPTNAME"}"
+#    pfx="${scriptName:-"NO SCRIPTNAME"}"
     logLvl=${1:-99}             # Logging level to log message at.
     logMsg="${2:-"NO LOGMSG"}"     # Messge to log.
     logWait="${3:-"nowait"}"    # wait="Press any key to continue."
