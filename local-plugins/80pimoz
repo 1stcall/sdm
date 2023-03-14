@@ -52,14 +52,18 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase 0 (Mounted environment)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 2 "Plugin $pfx: Running curl to get $SDMPT/etc/sdm/local-assets/RPiOS64-IA-Install.sh & making executable for Phase 1 (in nspawn)" 
-    #curl --verbose https://raw.githubusercontent.com/pimox/pimox7/master/RPiOS64-IA-Install.sh > $SDMPT/etc/sdm/local-assets/RPiOS64-IA-Install.sh
-    #chmod  +x $SDMPT/etc/sdm/local-assets/RPiOS64-IA-Install.sh
+    fDebugLog 2 "Plugin $pfx: Setting up pimox repository"
+    #### ADD SOURCE PIMOX7 + KEY & add repository
+    printf "# PiMox7 Development Repo
+    deb https://raw.githubusercontent.com/pimox/pimox7/master/ dev/ \n" | tee $SDMPT/etc/apt/sources.list.d/pimox.list
+
+    fDebugLog 2 "Plugin $pfx: Running curl to get gpg key for pimoz repository" 
+    curl https://raw.githubusercontent.com/pimox/pimox7/master/KEY.gpg | gpg --dearmo | tee $SDMPT/etc/apt/trusted.gpg.d/pimox.gpg
     #
-    #### FIX CONTAINER STATS NOT SHOWING UP IN WEB GUI #######################################################################################
+    fDebugLog 2 "Plugin $pfx: Configuring $SDMPT/boot/cmdline.txt"
     if [ "$(cat $SDMPT/boot/cmdline.txt | grep cgroup)" != "" ]
     then
-        printf "Seems to be already fixed!"
+        fDebugLog 2 "Plugin $pfx: Seems to be already configured!"
     else
         sed -i "1 s|$| cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1|" $SDMPT/boot/cmdline.txt
     fi
@@ -73,16 +77,14 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 2 "Plugin $pfx: Running $SDMPT/etc/sdm/local-assets/RPiOS64-IA-Install.sh"
-    #### ADD SOURCE PIMOX7 + KEY & UPDATE & INSTALL RPI-KERNEL-HEADERS #######################################################################
-    printf "# PiMox7 Development Repo
-    deb https://raw.githubusercontent.com/pimox/pimox7/master/ dev/ \n" | tee $SDMPT/etc/apt/sources.list.d/pimox.list
 #    $SDMPT/etc/sdm/local-assets/RPiOS64-IA-Install.sh
-    curl https://raw.githubusercontent.com/pimox/pimox7/master/KEY.gpg |  apt-key add -
+#    curl https://raw.githubusercontent.com/pimox/pimox7/master/KEY.gpg |  apt-key add -
     fDebugLog 3 "Plugin $pfx: updating apt" yesno 4
-    doaptrpterror "update" "${showapt}"
+#    doaptrpterror "update" "${showapt}"
     fDebugLog 3 "Plugin $pfx: installing pve-manager" yesno 4
-    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends -o Dpkg::Options::="--force-confdef" pve-manager
+    doaptrpterror "remove --purge --assume-yes linux-headers-*" "$showapt"
+    doaptrpterror "install --assume-yes --no-install-recommends -o Dpkg::Options::="--force-confdef" pve-manager" "$showapt"
+#    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends -o Dpkg::Options::="--force-confdef" pve-manager
 #    apt "install --no-install-recommends -o Dpkg::Options::=\"--force-confdef\" pve-manager"
     fDebugLog 3 "Plugin $pfx: installing proxmox-ve" yesno 4
     doaptrpterror "install  -y proxmox-ve" "${showapt}"
