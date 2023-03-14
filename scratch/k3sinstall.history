@@ -1,0 +1,50 @@
+    1  systemctl list-units --failed
+    2  journalctl --boot --system | negrep | more
+    3  systemctl status systemd-resolved.service 
+    4  ip a
+    5  curl -sfL https://get.k3s.io | sh -
+    6  cat /boot/cmdline.txt 
+    7  sed -i "1 s|$| cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1|" $SDMPT/boot/cmdline.txt
+    8  sudo sed -i "1 s|$| cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1|" $SDMPT/boot/cmdline.txt
+    9  reboot
+   10  cat /boot/cmdline.txt 
+   11  systemctl status k3s.service 
+   12  sudo cat /var/lib/rancher/k3s/server/node-token
+   13  ssh 192.168.1.11
+   14  ssh 192.168.1.12
+   15  ssh 192.168.1.13
+   16  ssh 192.168.1.14
+   17  ssh 192.168.1.11
+   18  ssh 192.168.1.12 "curl -sfL https://get.k3s.io | K3S_URL=https://192.168.1.1:6443 K3S_TOKEN=K100921b33dcdda554863acba0dd94ed4ea8933aee454441c3a454f75b4b2f0c8cf::server:9919b5d478bd340c2414f246bd0f26fc sh -"
+   19  ssh 192.168.1.12 "
+   20  ssh 192.168.1.12 
+   21  ssh 192.168.1.13
+   22  ssh 192.168.1.14
+   23  ssh 192.168.1.13
+   24  nano .bashrc 
+   25  source .bashrc 
+   26  ssh-copy-id 192.168.1.11
+   27  ssh 192.168.1.11
+   28  ssh 192.168.1.12
+   29  cd
+   30  ll
+   31  sudo kubectl get nodes
+   32  ssh 192.168.1.11
+   33  sudo kubectl get nodes
+   34  #ssh 192.168.1.12 /usr/local/bin/k3s-age
+   35  ssh 192.168.1.11
+   36  sudo kubectl get nodes
+   37  nmap 192.168.1.0/24
+   38  ssh 192.168.1.11
+   39  ssh 192.168.1.13 "/usr/local/bin/k3s-agent-uninstall.sh ; curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--snapshotter=native" K3S_URL=https://192.168.1.1:6443 K3S_TOKEN=K100921b33dcdda554863acba0dd94ed4ea8933aee454441c3a454f75b4b2f0c8cf::server:9919b5d478bd340c2414f246bd0f26fc sh -"
+   40  ssh -t 192.168.1.12 "poweroff"
+   41  ssh -t 192.168.1.12 "/usr/sbin/poweroff"
+   42  ssh -t 192.168.1.12 "/usr/sbin/shutdown -h now"
+   43  ssh -t 192.168.1.12
+   44  ssh -t 192.168.1.14
+   45  nmap 192.168.1.0/24
+   46  journalctl --follow --system --unit dnsmasq.service 
+   47  nmap 192.168.1.0/24
+   48  ssh 192.168.1.13 "/usr/local/bin/k3s-agent-uninstall.sh ; curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--snapshotter=native" K3S_URL=https://192.168.1.1:6443 K3S_TOKEN=K100921b33dcdda554863acba0dd94ed4ea8933aee454441c3a454f75b4b2f0c8cf::server:9919b5d478bd340c2414f246bd0f26fc sh -"
+   49  sudo kubectl get nodes
+   50  history | tee dev/sdm/scratch/k3sinstall.history
