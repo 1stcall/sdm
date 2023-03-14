@@ -78,7 +78,7 @@ else
     fDebugLog 2 "* Plugin $pfx: Configuring git."
     su $myuser --command="git config --global user.name \"Carl McAlwane\""
     su $myuser --command="git config --global user.email \"carlmcalwane@hotmail.co.uk\""
-    su $myuser --command="git config --global init.defaultBranch main"
+    su $myuser --command="git config --global init.defaultBranch dev"
     #
     #logfreespace "at end of $pfx Custom Phase post-install"
     fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait
