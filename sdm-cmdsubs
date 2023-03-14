@@ -195,7 +195,7 @@ function sdm_burndevfile() {
 	[ -f $burnfilefile ] && errexit "? Output IMG file '$burnfilefile' exists"
 	write_burnmsg "* Burn '$dimg' to Output IMG '$burnfilefile'..."
 	burnmsg+=("$(thisdate) > Burn IMG command line: $cmdline")
-	ddcmd="cp -va --reflink $dimg $burnfilefile"
+	ddcmd="cp -va --reflink=auto $dimg $burnfilefile"
 	burnmsg+=("$(thisdate) > dd command: $ddcmd")
 	# Burn the IMG to the file
 	echo "$ddcmd"
