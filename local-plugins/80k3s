@@ -42,16 +42,12 @@ fi
 #
 source $SDMPT/etc/sdm/local-assets/common.sh || exit 1
 fDebugLog 2 "* Plugin ${pfx}: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno
-set -x
-echo "pfx:$pfx" 1>&2
 #
 if [[ "$phase" == "0" ]]
 then
     #
     # In Phase 0 (Mounted environment) all references to directories in the image must be preceded by $SDMPT
     #
-    echo "pfx:$pfx" 1>&2
-    set +x
     fDebugLog 1 "* Plugin ${pfx}: Start Phase."
     fDebugLog 3 "$(plugin_printkeys)"
     #

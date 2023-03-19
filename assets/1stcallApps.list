@@ -4,3 +4,4 @@ tmux
 apt-transport-https
 acl
 #apt-listbugs apt-listchanges
+curl
