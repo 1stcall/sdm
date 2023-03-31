@@ -128,7 +128,7 @@ case "$cmd" in
     apt)
 	logtoboth "* Start apt maintenance"
 	logfreespace "at start of 'apt $cmdoptions'"
-	[[ "$cmdoptions" =~ "update" ]] &&  logtoboth "> Perform 'apt update'" && (doapt "--yes update"  0 || logapterror)
+	[[ "$cmdoptions" =~ "update" ]] &&  logtoboth "> Perform 'apt update'" && (doapt "--yes update" $showapt || logapterror)
 	[[ "$cmdoptions" =~ "upgrade" ]] && logtoboth "> Perform 'apt $upg'" && upgkeepconf --yes 0 $aptdistupgrade
 	[[ "$cmdoptions" =~ "autoremove" ]] && logtoboth "> Perform 'apt autoremove'" && (doapt "--yes autoremove" 0 || logapterror)
 	cklogfreespace "at end of 'apt $cmdoptions'"
