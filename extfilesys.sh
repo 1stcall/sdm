@@ -368,13 +368,13 @@ if [[ $VERBOSE -ge 4 || $DEBUG -ge 2 ]]; then
     log "ERR_GETOPT_CANNOT_PARSE=$ERR_GETOPT_CANNOT_PARSE"
     log "ERR_DEBUG_STOP=$ERR_DEBUG_STOP"
     log "ERR_NO_ROOT=$ERR_NO_ROOT"
-    (( DEBUG > 0 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
+    (( DEBUG > 3 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
     log
     log "###########################################################"
     log "#                        Traps                            #"
     log "###########################################################"
     trap -p 1>&2
-    (( DEBUG > 0 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
+    (( DEBUG > 3 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
     log
 fi
 if [[ $VERBOSE -ge 3 || $DEBUG -ge 2 ]]; then
@@ -391,7 +391,7 @@ if [[ $VERBOSE -ge 3 || $DEBUG -ge 2 ]]; then
     log "OUTDIR=$OUTDIR"
     log "SERIALNO=$SERIALNO"
     log "###########################################################"
-    (( DEBUG > 0 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
+    (( DEBUG > 3 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
     log
     log "###########################################################"
     log "#                  Working variables                      #"
@@ -405,7 +405,7 @@ if [[ $VERBOSE -ge 3 || $DEBUG -ge 2 ]]; then
     log "dryRun=${dryRun}"
     log "overwrite=${overwrite}"
     log "###########################################################"
-    (( DEBUG > 0 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
+    (( DEBUG > 3 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
     log 
 fi
 if [[ $VERBOSE -ge 4 || $DEBUG -ge 2 ]]; then
@@ -421,7 +421,7 @@ if [[ $VERBOSE -ge 4 || $DEBUG -ge 2 ]]; then
     log "rsyncCommand=$rsyncCommand"
     log "findOps=$findOps"
     log "###########################################################"
-    (( DEBUG > 0 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
+    (( DEBUG > 3 )) && log yesno "DEBUG=$DEBUG  -  VERBOSE=$VERBOSE  -  DRYRUN=$DRYRUN"
     log
 fi
 

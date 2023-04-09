@@ -46,7 +46,7 @@ if [[ $BASEIMG == "" ]]; then
     baseImage=$(echo ${downloadUrl} | sed 's:.*/::')
     baseImage=${baseImage::-3}
 else
-    fDebugLog 2 "Skipping get_latest_pios because BASEIMG is set"
+    fDebugLog 2 "Skipping get_latest_pios because BASEIMG is set ($BASEIMG)"
     baseImage=${BASEIMG}
 fi
 
@@ -68,10 +68,10 @@ fDebugLog 4 "Proceed with settings." yesno 4 || errexit "User aborted."
 
 if [[ ! -d "${baseDirectory}/${baseImageDirectory}/" ]]
 then
-    fDebugLog 2 "Making directory ${baseDirectory}/${baseImageDirectory}/"
+    fDebugLog 2 "Making directory ${baseDirectory}/${baseImageDirectory}/."
     su ${callingUser} --command="$mkdirCmd ${baseDirectory}/${baseImageDirectory}/"
 else
-    fDebugLog 2 "Skipping Making directory ${baseDirectory}/${baseImageDirectory}/"
+    fDebugLog 2 "Skipping Making directory ${baseDirectory}/${baseImageDirectory}/ because it already exists."
 fi
 
 if [[ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ]] ; then
@@ -83,7 +83,7 @@ if [[ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ]] ; then
     curlOps="" && [ "$DEBUG" -ge 2 ] && curlOps="--verbose"
     su ${callingUser} --command="curl $curlOps $downloadUrl | unxz - > ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 else
-    fDebugLog 2 "Skipping Downloading & extracting ${downloadUrl}"
+    fDebugLog 2 "Skipping Downloading & extracting ${downloadUrl} because $baseImage alreay exists."
     fDebugLog 2 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 fi
 
@@ -92,7 +92,7 @@ then
     fDebugLog 2 "Making directory ${baseDirectory}/output/"
     su ${callingUser} --command="$mkdirCmd ${baseDirectory}/output/"
 else
-    fDebugLog 2 "Skipping Making directory ${baseDirectory}/output/"
+    fDebugLog 2 "Skipping Making directory ${baseDirectory}/output/ because it alreay exists."
 fi
 
 fDebugLog 2 "Copying ${baseDirectory}/${baseImageDirectory}/${baseImage} to ${baseDirectory}/output/1stcall.uk-base.img"
@@ -118,11 +118,13 @@ sdmCmd="${sdmCmd} --password-pi letmein123"
 #sdmCmd="${sdmCmd} --user carl"
 #sdmCmd="${sdmCmd} --password-user letmein123"
 #sdmCmd="${sdmCmd} --plugin apt-file"
-sdmCmd="${sdmCmd} --plugin 10mydotfiles:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
-#sdmCmd="${sdmCmd} --plugin 20bullseye-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
-sdmCmd="${sdmCmd} --plugin 20bookworm-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
-sdmCmd="${sdmCmd} --plugin 50btfix:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/10mydotfiles:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+#sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/20bullseye-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/20bookworm-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/50btfix:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 [[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --plugin-debug"
+#sdmCmd="${sdmCmd} --aptcache 192.168.0.42"
+sdmCmd="${sdmCmd} --aptcache rpicm4-1.1stcall.uk"
 fDebugLog 1 "Running ${sdmCmd}"
 fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"

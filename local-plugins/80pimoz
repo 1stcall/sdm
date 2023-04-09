@@ -3,46 +3,49 @@
 set -e
 #
 function pluginHelp(){
-    cat <<EOF 1>&2
-I: 'phase: ${phase}'
+    cat <<-EOF 1>&2
+		I: 'phase: ${phase:-help}'
 
-This is an sdm plugin for: ${pfx}.  This is a test plugin to experiment with code.
+		This is an sdm plugin for: ${pfx}.  This is a test plugin to experiment with code.
 
-The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
-'\$1' is the phase: "0", "1", or "post-install"
-'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...4
+		The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
+		'\$1' is the phase: "0", "1", or "post-install"
+		'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...4
 
-Valid arguments to this plugin are:-
-    assetDir    -   Directory where local assets such as common.sh are stored.
+		Valid arguments to this plugin are:-
+		    assetDir    -   Directory where local assets such as common.sh are stored.
+            DEBUG       -   Debug level for debug messages and breakpoints.
+            LOGPREFIX   -   Prefix for debug log messages
 
-EOF
+	EOF
 }
 #
 # Main code for the Plugin
 #
 phase=${1}
-pfx="$(basename $0)"     #For messages
+pfx="$(basename "$0")"     #For messages
 args="$2"
 #
 # Check that phase is set to check if we are running within sdm.  If not set 
 # or set to help, then display help text & exit.
 #
-#[[ -z ${phase} ]] || [[ ${phase} =~ help ]] && pluginHelp && exit 0
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
-source $SDMPT/etc/sdm/sdm-readparams
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/sdm-readparams
 #DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
-plugin_getargs $pfx "$args" "|assetDir|DEBUG|LOGPREFIX|"
+plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|"
 #
 copiedCommon=0
-if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
+if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ] 
 then
     copiedCommon=1
-    cp -av $assetDir/common.sh $SDMPT/etc/sdm/local-assets/common.sh && copiedCommon=3
+    cp -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh && copiedCommon=3
 fi
 #
-source $SDMPT/etc/sdm/local-assets/common.sh
-fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno 4
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/local-assets/common.sh
+fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno
 #
 if [[ "$phase" == "0" ]]
 then
@@ -55,19 +58,19 @@ then
     fDebugLog 2 "Plugin $pfx: Setting up pimox repository"
     #### ADD SOURCE PIMOX7 + KEY & add repository
     printf "# PiMox7 Development Repo
-    deb https://raw.githubusercontent.com/pimox/pimox7/master/ dev/ \n" | tee $SDMPT/etc/apt/sources.list.d/pimox.list
+    deb https://raw.githubusercontent.com/pimox/pimox7/master/ dev/ \n" | tee "$SDMPT"/etc/apt/sources.list.d/pimox.list
 
     fDebugLog 2 "Plugin $pfx: Running curl to get gpg key for pimoz repository" 
-    curl https://raw.githubusercontent.com/pimox/pimox7/master/KEY.gpg | gpg --dearmo | tee $SDMPT/etc/apt/trusted.gpg.d/pimox.gpg
+    curl https://raw.githubusercontent.com/pimox/pimox7/master/KEY.gpg | gpg --dearmo | tee "$SDMPT"/etc/apt/trusted.gpg.d/pimox.gpg
     #
     fDebugLog 2 "Plugin $pfx: Configuring $SDMPT/boot/cmdline.txt"
-    if [ "$(cat $SDMPT/boot/cmdline.txt | grep cgroup)" != "" ]
+    if [ "$(grep cgroup "$SDMPT"/boot/cmdline.txt)" != "" ]
     then
         fDebugLog 2 "Plugin $pfx: Seems to be already configured!"
     else
-        sed -i "1 s|$| cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1|" $SDMPT/boot/cmdline.txt
+        sed -i "1 s|$| cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1|" "$SDMPT"/boot/cmdline.txt
     fi
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" yesno 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" yesno
     #
 elif [[ "$phase" == "1" ]]
 then
@@ -79,35 +82,29 @@ then
     #
 #    $SDMPT/etc/sdm/local-assets/RPiOS64-IA-Install.sh
 #    curl https://raw.githubusercontent.com/pimox/pimox7/master/KEY.gpg |  apt-key add -
-    fDebugLog 3 "Plugin $pfx: updating apt" yesno 4
+    fDebugLog 3 "Plugin $pfx: updating apt" yesno
 #    doaptrpterror "update" "${showapt}"
-    fDebugLog 3 "Plugin $pfx: installing pve-manager" yesno 4
-    doaptrpterror "remove --purge --assume-yes linux-headers-*" "$showapt"
+    fDebugLog 3 "Plugin $pfx: installing pve-manager" yesno
+    doaptrpterror "remove --purge --assume-yes linux-headers-*" "${showapt:-}"
     doaptrpterror "install --assume-yes --no-install-recommends -o Dpkg::Options::="--force-confdef" pve-manager" "$showapt"
-#    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends -o Dpkg::Options::="--force-confdef" pve-manager
-#    apt "install --no-install-recommends -o Dpkg::Options::=\"--force-confdef\" pve-manager"
-    fDebugLog 3 "Plugin $pfx: installing proxmox-ve" yesno 4
+    fDebugLog 3 "Plugin $pfx: installing proxmox-ve" yesno
     doaptrpterror "install  -y proxmox-ve" "${showapt}"
     #
     #### CONFIGURE PIMOX7 BANNER #############################################################################################################
-    cp ${SDMPT}/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js ${SDMPT}/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js.auto.backup
+    ${cpCmd:-} "${SDMPT}"/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js "${SDMPT}"/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js.auto.backup
     SEARCH="return Ext.String.format('"
     #### PLACE HOLDER BANNER BEGIN --> #### LINE 1 ####                                                     #### LINEBREAK #### -- #### LINE 2 #####
     REPLACE="return Ext.String.format(' This is a unofficial development build of PVE7 - PIMOX7 - https://github.com/1stcall/pimox7  Build to run a PVE7 on the RPi4. ! ! ! NO GUARANTEE NOT OFFICIALLY SUPPORTED ! ! ! ');"
-    sed -i "s|$SEARCH.*|$REPLACE|" ${SDMPT}/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+    sed -i "s|$SEARCH.*|$REPLACE|" "${SDMPT}"/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
     #
     #logfreespace "at end of $pfx Phase 1 (in nspawn)"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" yesno 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" yesno
     #
 else
     #
     # Plugin Phase 2 (post-install) edits
     #
     fDebugLog 1 "* Plugin $pfx: Start Phase Phase 2 (post-install)"
-    fDebugLog 3 "$(plugin_printkeys)"
-    #    
-    fDebugLog 3 "* Plugin $pfx: renamepi=${renamepi}  -   myuser=${myuser}  -   callingUser=${callingUser}  -   USER=${USER}"
-    fDebugLog 3 "* Plugin $pfx: DEBUG=${DEBUG}  -   scriptName=${scriptName}  -   LOGPREFIX=${LOGPREFIX}"
-    #
+    fDebugLog 3 "* Plugin $pfx: Nothing to do"
     fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)"
 fi

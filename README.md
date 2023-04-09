@@ -1,5 +1,27 @@
-# sdm
+# sdm <!-- omit in toc -->
 Raspberry Pi SSD/SD Card Image Manager
+
+- [To Do](#to-do)
+- [Description](#description)
+- [Usage overview](#usage-overview)
+  - [sdm Quick Start](#sdm-quick-start)
+- [Install sdm](#install-sdm)
+- [Customize the image with sdm](#customize-the-image-with-sdm)
+- [Burn the image onto the SD Card](#burn-the-image-onto-the-sd-card)
+- [Boot and Go](#boot-and-go)
+- [What else can sdm do?](#what-else-can-sdm-do)
+- [Complete sdm Documentation](#complete-sdm-documentation)
+
+## To Do
+
+* Write a plugin (probably) to expire password to force a password change on 1st login.
+* Write a plugin to upgrade to testing.  Bullseye at the minute.  Test is sid would work.  Current code in 20bookworm-backports.  This may allow 1 plugin for backports!
+* Consider moving bookworm-sources.list to sources.list.d & removing sources.list.  This would be part of the upgrade plugin above.  Current code is in 20bookworm-backports.
+* Write a plugin to remove unwanted/unneeded apps.  triggerhappy, dphys-swapfile (if zram-tools is installed / to be installed)
+* Light mode for coloured output for logs.  Think about html output for the webui.
+* Design/Build web api and webui.
+* Split up plugin 70devtools* into indervidual plugins per app.
+* Move downloading keys and adding repos to stage 0 (Mounted environment) in 70devtools pluin.
 
 ## Description
 

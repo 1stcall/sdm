@@ -5,9 +5,10 @@ alias apt='sudo $(which apt)'
 alias reboot='sudo $(which reboot)'
 alias halt='sudo $(which alias)'
 alias poweroff='sudo $(which poweroff)'
+alias systemctl='sudo $(which systemctl)'
 alias grep='grep --color'
 alias higrep='grep --color=always -e "^" -e '
-alias trashboot='sudo /home/$USER/.local/usr/bin/trashboot.sh'
+alias trashboot='/home/$USER/.local/usr/bin/trashboot.sh'
 alias iptables='sudo $(which iptables)'
 
 function negrep(){

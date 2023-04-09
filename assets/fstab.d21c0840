@@ -1,3 +1,4 @@
-proc            /proc           proc    defaults          0       0
-192.168.1.1:/srv/netboot/tftp/d21c0840 /boot nfs defaults,vers=4.1,proto=tcp 0 0
-192.168.1.1:/srv/netboot/nfs/d21c0840 /     nfs defaults,vers=4.1,proto=tcp 0 0
+proc                                    /proc       proc    defaults                        0 0
+#
+192.168.1.1:/srv/netboot/tftp/d21c0840  /boot       nfs     defaults,vers=4.2,proto=tcp     0 0
+192.168.1.1:/srv/netboot/nfs/d21c0840   /           nfs     defaults,vers=4.2,proto=tcp     0 0

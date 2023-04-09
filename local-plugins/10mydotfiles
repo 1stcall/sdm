@@ -1,27 +1,30 @@
 #!/usr/bin/env bash
 #
 pluginHelp(){
-    cat <<EOF
-I: 'phase: ${phase}'
+    # tabs in heredoc added with vscode keybinding ctrl+k [tab]
+    cat <<-EOF 1>&2
+		I: 'phase: ${phase:-help}'
 
-This is an sdm plugin for: ${pfx}.  
+		This is an sdm plugin for: ${pfx}.  
 
-This pluging installs my dot files from the argument assetDir to my home directory.
+		This pluging installs my dot files from the argument assetDir to my home directory.
 
-The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
-'\$1' is the phase: "0", "1", or "post-install"
-'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+		The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
+		'\$1' is the phase: "0", "1", or "post-install"
+		'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
 
-Valid arguments to this plugin are:-
-    assetDir    -   Directory where local assets such as my dot files are stored.
+		Valid arguments to this plugin are:-
+		    assetDir    -   Directory where local assets such as my dot files are stored.
+            DEBUG       -   Debug level for debug messages and breakpoints.
+            LOGPREFIX   -   Prefix for debug log messages
 
-EOF
+	EOF
 }
 #
 # Main code for the Plugin
 #
 phase=${1}
-pfx="$(basename $0)"     #For messages
+pfx="$(basename "$0")"     #For messages
 args="$2"
 #
 # Check that phase is set to check if we are running within sdm.  If not set 
@@ -29,17 +32,18 @@ args="$2"
 #
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
-source $SDMPT/etc/sdm/sdm-readparams
-#DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
-plugin_getargs $pfx "$args" "|assetDir|DEBUG|LOGPREFIX|"
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/sdm-readparams
+plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|"
 #
-if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
+if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ] 
 then 
-    cp -av $assetDir/common.sh $SDMPT/etc/sdm/local-assets/common.sh
+    cp -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
 fi
 #
-source $SDMPT/etc/sdm/local-assets/common.sh
-fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/local-assets/common.sh
+fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait 6
 #
 if [[ "$phase" == "0" ]]
 then
@@ -50,9 +54,9 @@ then
     fDebugLog 3 "$(plugin_printkeys)"
     #
     fDebugLog 2 "* Plugin $pfx: Copying local assets to image"
-    $cpCmd $assetDir/. $SDMPT/etc/sdm/local-assets
+    ${cpDirCmd:-} "$assetDir"/ "$SDMPT"/etc/sdm/local-assets/
     #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)"
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" yesno
     #
 elif [[ "$phase" == "1" ]]
 then
@@ -61,10 +65,8 @@ then
     #
     fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
     fDebugLog 3 "$(plugin_printkeys)"
-    #
     fDebugLog 2 "* Plugin $pfx: Nothing to do"
-    #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait 6
     #
 else
     #
@@ -74,15 +76,13 @@ else
     fDebugLog 3 "$(plugin_printkeys)"
     #    
     fDebugLog 2 "> Plugin $pfx: Copying .bash_aliases > home directory"
-    $cpCmd $SDMPT/etc/sdm/local-assets/.bash_aliases $SDMPT/home/$myuser/
+    $cpCmd "$SDMPT"/etc/sdm/local-assets/.bash_aliases "$SDMPT"/home/"${myuser:-pi}"/.bash_aliases
     #
     fDebugLog 2 "> Plugin $pfx: Copying .bashrc > home directory"
-    $cpCmd $SDMPT/etc/sdm/local-assets/.bashrc $SDMPT/home/$myuser/
+    $cpCmd "$SDMPT"/etc/sdm/local-assets/.bashrc "$SDMPT"/home/"${myuser:-pi}"/.bashrc
     #
     fDebugLog 2 "> Plugin $pfx: Linking .Xauthority so sudo gui apps works with X11 forwarding" 
-    ln -sv /home/carl/.Xauthority $SDMPT/root/.Xauthority
+    ln -sv /home/carl/.Xauthority "$SDMPT"/root/.Xauthority 
     #
-    fDebugLog 3 "renamepi=$renamepi    myuser=$myuser"
-    #
-    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait
+    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" yesno 
 fi

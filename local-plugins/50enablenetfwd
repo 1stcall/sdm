@@ -1,25 +1,28 @@
 #!/usr/bin/env bash
 #
 function pluginHelp(){
-    cat <<EOF 1>&2
-I: 'phase: ${phase}'
+    # tabs in heredoc added with vscode keybinding ctrl+k [tab]
+    cat <<-EOF 1>&2
+		I: 'phase: ${phase:-help}'
 
-This is an sdm plugin for: ${pfx}.  This enables net.ipv4.ip_forward and /net.ipv6.conf.all.forwarding in sysctl.conf.
+		This is an sdm plugin for: ${pfx}.  This enables net.ipv4.ip_forward and /net.ipv6.conf.all.forwarding in sysctl.conf.
 
-The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
-'\$1' is the phase: "0", "1", or "post-install"
-'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+		The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
+		'\$1' is the phase: "0", "1", or "post-install"
+		'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
 
-Valid arguments to this plugin are:-
-    assetDir    -   Directory where local assets such as common.sh are stored.
+		Valid arguments to this plugin are:-
+		    assetDir    -   Directory where local assets such as common.sh are stored.
+            DEBUG       -   Debug level for debug messages and breakpoints.
+            LOGPREFIX   -   Prefix for debug log messages
 
-EOF
+	EOF
 }
 #
 # Main code for the Plugin
 #
 phase=${1}
-pfx="$(basename $0)"     #For messages
+pfx="$(basename "$0")"     #For messages
 args="$2"
 #
 # Check that phase is set to check if we are running within sdm.  If not set 
@@ -27,16 +30,17 @@ args="$2"
 #
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
-source $SDMPT/etc/sdm/sdm-readparams
-#DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
-plugin_getargs $pfx "$args" "|assetDir|DEBUG|LOGPREFIX|"
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/sdm-readparams
+plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|"
 #
-if ! [ -f $SDMPT/etc/sdm/local-assets/common.sh ] 
+if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ] 
 then 
-    cp -av $assetDir/common.sh $SDMPT/etc/sdm/local-assets/common.sh
+    cp -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
 fi
 #
-source $SDMPT/etc/sdm/local-assets/common.sh
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/local-assets/common.sh
 fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
 #
 if [[ "$phase" == "0" ]]
@@ -48,11 +52,12 @@ then
     fDebugLog 3 "$(plugin_printkeys)"
     #
     fDebugLog 2 "* Plugin $pfx: Enabling net forward."
-    $cpCmd $SDMPT/etc/sysctl.conf $SDMPT/etc/sysctl.conf.orig  
-    cat $SDMPT/etc/sysctl.conf | \
+    ${cpCmd:-} "$SDMPT"/etc/sysctl.conf "$SDMPT"/etc/sysctl.conf.orig  
+    # shellcheck disable=SC2002  
+    cat "$SDMPT"/etc/sysctl.conf | \
         sed 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' | \
         sed 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' \
-        | "$teeCmd" $SDMPT/etc/sysctl.conf
+        | "${teeCmd:-}" "$SDMPT"/etc/sysctl.conf
     #
     fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
     #
@@ -64,18 +69,18 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-    fDebugLog 2 "* Plugin $pfx: Enabling net forward."
-    fDebugLog 3 "teeCmd=$teeCmd" wait
-
-    $cpCmd $SDMPT/etc/sysctl.conf $SDMPT/etc/sysctl.conf.orig  
-    cat $SDMPT/etc/sysctl.conf | \
-        sed 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' | \
-        sed 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' \
-        | $teeCmd $SDMPT/etc/sysctl.conf
-    #
-    fDebugLog 3 "teeCmd=$teeCmd" yesno
+#    fDebugLog 2 "* Plugin $pfx: Enabling net forward."
+#    #
+#    $cpCmd "$SDMPT"/etc/sysctl.conf "$SDMPT"/etc/sysctl.conf.orig
+#    #
+#    # shellcheck disable=SC2002  
+#    cat "$SDMPT"/etc/sysctl.conf \
+#        | sed 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' \
+#        | sed 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' \
+#        | $teeCmd "$SDMPT"/etc/sysctl.conf
+#    #
     fDebugLog 2 "> Plugin $pfx: Installing & enabling iptables-persistent"
-    doaptrpterror "install --no-install-recommends -y iptables-persistent" "${showapt}"
+    doaptrpterror "install --no-install-recommends -y iptables-persistent" "${showapt:-}"
     
     fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)"
     #
@@ -87,10 +92,7 @@ else
     fDebugLog 3 "$(plugin_printkeys)"
     #
     fDebugLog 2 "> Plugin $pfx: Configuring iptable rules."
-    #iptables --verbose -A FORWARD -i eth1 -o eth0 -j ACCEPT
-    cp -av $SDMPT/etc/sdm/local-assets/rules.v{4,6} $SDMPT/etc/iptables/
-
-#    fDebugLog 2 "* Plugin $pfx: Nothing to do"
+    $cpCmd "$SDMPT"/etc/sdm/local-assets/rules.v{4,6} "$SDMPT"/etc/iptables/
     #
     fDebugLog 1 "* Plugin $pfx: Complete Phase post-install"
     #
