@@ -1,5 +1,18 @@
 # Changelog
 
+## V7.12
+
+* Use `cp -a` for most file copies to preserve actual file creation date/time
+
+## V7.11.1
+
+* When burning, sdm checked for plugins' existence too late. It's now just right.
+
+## V7.11
+
+* Correct plugin update handling during burn commands when full path to plugin provided. See <a href="https://github.com/gitbls/sdm/blob/master/Docs/Programming-Plugins-and-Custom-Phase-Scripts.md">Programming Plugins</a> for details
+* Improve message consistency
+
 ## V7.10
 
 * Add new plugin burnpwd that will either prompt for a user's password or generate a random password, wih neither being stored in the IMG

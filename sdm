@@ -327,7 +327,7 @@ function readl10n() {
     then
 	source /etc/default/keyboard
     else
-	logtoboth ">%/etc/default/keyboard missing; Keyboard set to 'us'"
+	logtoboth "% /etc/default/keyboard missing; Keyboard set to 'us'"
 	XKBLAYOUT="us"
     fi
     keymap="$XKBLAYOUT"
@@ -452,7 +452,7 @@ Command Switches for --customize and --burn or as noted
  --password-user pwd Set password for the --user user (will prompt if not provided)
  --password-root pwd Set password for root (will prompt if not provided and --rootpwd)
  --password-same y|n Use same password for pi, --user user (if set), and root (if --rootpwd)
- --plugin pname:\"args\" Run plugin pname with the specified args (if multiple, separate with '|'
+ --plugin pname:\"args\" Run plugin pname with the specified args (separate multiple args with '|')
  --plugin-debug      Print plugin debug messages
  --poptions str      Set Phase 1 auto-run options
  --redact            Redact passwords in /etc/sdm/history and /etc/sdm/cparams when burning
@@ -493,7 +493,7 @@ Command Switches for --customize and --burn or as noted
 # Initialize and Parse the command
 #
 #
-version="V7.10"
+version="V7.12"
 sdmcommandline="$0 $@"      #Used in error messages
 apip="10.1.1.1"             #Default IP for the WiFi Captive Portal
 apssid="sdm"                #Default SSID for the WiFi Captive Portal
@@ -937,7 +937,7 @@ exitiferr "$os"
 os=${os#|} ; os=${os%|}  #Strip off the vbars
 [ "$os" == "raspbian" -o "$os" == "" ] && os="raspios"  #Allow old habits to never die ;)
 [ "$os" != "raspios" ] && errexit "? Unsupported --os value: $os"
-if [ "$plugins" != "" ]
+if [ "$plugins" != "" ]    # Don't update plugins on host if burning
 then
     IFS="~" read -a plugs <<< $plugins
     for p in "${plugs[@]}"
@@ -951,7 +951,7 @@ then
 	    then
 		[ -x $d/$pn ] || errexit "? Plugin $d/$pn is not executable"
 		# if plugin found outside of sdm hierarchy copy it in
-		if [ "$d" == "$(dirname $p)" ]
+		if [ "$d" == "$(dirname $p)" -a $burning -eq 0 ]
 		then
 		    copyifnewer $d/$pn $src/local-plugins && write_premsg "% Copy Plugin '$pn' from '$d/$pn' to '$src/local-plugins'"
 		fi
@@ -1282,23 +1282,23 @@ else
     mkdir -p $SDMPT/$sdmdir/1piboot
     for f in $sdmflist
     do
-	cp -v $src/$f $SDMPT/$sdmdir
+	cp -av $src/$f $SDMPT/$sdmdir
     done
     rm -f $SDMPT/usr/local/bin/sdm
     ln -s $sdmdir/sdm $SDMPT/usr/local/bin
     mkdir -p $SDMPT/$sdmdir/{plugins,local-plugins}
-    cp $src/plugins/* $SDMPT/$sdmdir/plugins
-    [ "$(ls $src/local-plugins 2>/dev/null)" != "" ] && cp $src/local-plugins/* $SDMPT/$sdmdir/local-plugins
+    cp -a $src/plugins/* $SDMPT/$sdmdir/plugins
+    [ "$(ls $src/local-plugins 2>/dev/null)" != "" ] && cp -a $src/local-plugins/* $SDMPT/$sdmdir/local-plugins
     # Always set this in case system with non-std location does sdm and sets it to /usr/local/sdm
     sed -i "s#SDMDIR=\".*\"#SDMDIR=\"$sdmdir\"#" $SDMPT/$sdmdir/sdm-gburn
-    cp $src/sdm-readparams $SDMPT/etc/sdm
+    cp -a $src/sdm-readparams $SDMPT/etc/sdm
     chmod 755 $SDMPT/$sdmdir/*
-    [ "${appfile:0:1}" == "@" ]  && cp -f ${appfile:1:999}  $SDMPT/$sdmdir
-    [ "${xappfile:0:1}" == "@" ] && cp -f ${xappfile:1:999} $SDMPT/$sdmdir
+    [ "${appfile:0:1}" == "@" ]  && cp -a -f ${appfile:1:999}  $SDMPT/$sdmdir
+    [ "${xappfile:0:1}" == "@" ] && cp -a -f ${xappfile:1:999} $SDMPT/$sdmdir
     logtoboth "* Start Configuration"                         # Make possible triggerhappy/journal messages more visible
     if compgen -G "$src/1piboot/*.sh" > /dev/null
     then
-	cp -f $src/1piboot/*.sh $SDMPT/$sdmdir/1piboot
+	cp -a -f $src/1piboot/*.sh $SDMPT/$sdmdir/1piboot
 	if [ $bootscripts -eq 1 ]
 	then
 	    [ -f $SDMPT/$sdmdir/1piboot/010-disable-triggerhappy.sh ] && logtoboth "!!sdm now supports '--disable triggerhappy'; suggest removing $sdmdir/1piboot/010-disable-triggerhappy.sh"
@@ -1334,25 +1334,25 @@ else
     if [ "$pi1bootconf" != "" ]
     then
 	logtoboth "> Copy Custom 1piboot.conf '$pi1bootconf' to the $dimgdevname"
-	cp $pi1bootconf $SDMPT/etc/sdm/1piboot.conf
-	cp $pi1bootconf $SDMPT/$sdmdir/1piboot                                         #Drop a copy in $sdmdir in the IMG
+	cp -a $pi1bootconf $SDMPT/etc/sdm/1piboot.conf
+	cp -a $pi1bootconf $SDMPT/$sdmdir/1piboot                                         #Drop a copy in $sdmdir in the IMG
     else
 	if [ -d $src/1piboot -a -f $src/1piboot/1piboot.conf ]
 	then
-	    cp $src/1piboot/1piboot.conf $SDMPT/etc/sdm/
-	    cp $src/1piboot/1piboot.conf $SDMPT/$sdmdir/1piboot
+	    cp -a $src/1piboot/1piboot.conf $SDMPT/etc/sdm/
+	    cp -a $src/1piboot/1piboot.conf $SDMPT/$sdmdir/1piboot
 	fi
     fi
     [ -f $SDMPT/etc/sdm/1piboot.conf ] && chmod 644 $SDMPT/etc/sdm/1piboot.conf
     if [ "$cscript" != "" ]
     then
 	logtoboth "> Copy Custom Phase Script '$cscript' to $sdmdir in the $dimgdevname"
-	cp $cscript $SDMPT/$sdmdir
+	cp -a $cscript $SDMPT/$sdmdir
     fi
     chmod 755 $SDMPT/$sdmdir/*
     # If --apps and/or --xapps are files copy them also. If not, clear the variables for writeconfig
-    [ "${appfile:0:1}" == "@" ]  && cp ${appfile:1:999}  $SDMPT/$sdmdir || appfile=""
-    [ "${xappfile:0:1}" == "@" ] && cp ${xappfile:1:999} $SDMPT/$sdmdir || xappfile=""
+    [ "${appfile:0:1}" == "@" ]  && cp -a ${appfile:1:999}  $SDMPT/$sdmdir || appfile=""
+    [ "${xappfile:0:1}" == "@" ] && cp -a ${xappfile:1:999} $SDMPT/$sdmdir || xappfile=""
     #
     # Write the config settings into the IMG
     #
