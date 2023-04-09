@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 #
-pluginHelp(){
+set -e
+#
+function pluginHelp(){
     # tabs in heredoc added with vscode keybinding ctrl+k [tab]
     cat <<-EOF 1>&2
-		I: 'phase: ${phase:-help}'
+		I: plugin: '${pfx}' phase: '${phase:-help}'
+		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
 		This is an sdm plugin for: ${pfx}.  
 
-		This pluging installs my dot files from the argument assetDir to my home directory.
+		This pluging first (Phase 0 mounted environment), copies the [assetDir] to the image and
+		then (Phase post-install), installs my dot files from the [assetDir] to my home directory.
 
 		The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
 		'\$1' is the phase: "0", "1", or "post-install"
@@ -15,8 +19,13 @@ pluginHelp(){
 
 		Valid arguments to this plugin are:-
 		    assetDir    -   Directory where local assets such as my dot files are stored.
-            DEBUG       -   Debug level for debug messages and breakpoints.
-            LOGPREFIX   -   Prefix for debug log messages
+		    DEBUG       -   Debug level for debug messages and breakpoints.
+		    LOGPREFIX   -   Prefix for debug log messages
+
+		To do:  Seperate the copying of the assets directory into a seperate plugin.
+		        Pass a list of files to install as arguments or a file containing the list.
+
+		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
 	EOF
 }
@@ -32,7 +41,7 @@ args="$2"
 #
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
-# shellcheck source=/dev/null
+# shellcheck source=../sdm-readparams
 source "$SDMPT"/etc/sdm/sdm-readparams
 plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|"
 #
@@ -41,7 +50,7 @@ then
     cp -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
 fi
 #
-# shellcheck source=/dev/null
+# shellcheck source=../assets/common.sh
 source "$SDMPT"/etc/sdm/local-assets/common.sh
 fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait 6
 #

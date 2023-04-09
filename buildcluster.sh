@@ -5,6 +5,7 @@ set -e
 SECONDS=0
 export DEBUG=${DEBUG:-0}
 printf "%s Started at %s.\n" "$(basename "$0")" "$(date +'%X')"
+# shellcheck source=./assets/common.sh
 source ./assets/common.sh
 #
 ./customize.sh
@@ -15,9 +16,9 @@ source ./assets/common.sh
 ./bf_rpi4b-4.sh
 #
 ./extfilesys.sh -v -v -o output/rpi4b-1-out.img /srv/netboot d21c0840
-./extfilesys.sh -v -v -o output/rpi4b-1-out.img /srv/netboot acdce532
-./extfilesys.sh -v -v -o output/rpi4b-1-out.img /srv/netboot 9fb41f35
-./extfilesys.sh -v -v -o output/rpi4b-1-out.img /srv/netboot 9210668e
+./extfilesys.sh -v -v -o output/rpi4b-2-out.img /srv/netboot acdce532
+./extfilesys.sh -v -v -o output/rpi4b-3-out.img /srv/netboot 9fb41f35
+./extfilesys.sh -v -v -o output/rpi4b-4-out.img /srv/netboot 9210668e
 #
 [[ -f /mnt/rescuedata/$(date +'%Y-%m-%d')-rpicm4-1-lite.img ]] && \
     mv -v /mnt/rescuedata/"$(date +'%Y-%m-%d')"-rpicm4-1-lite.img \
@@ -26,4 +27,4 @@ source ./assets/common.sh
 rsync --no-i-r --info=progress2 --verbose output/rpicm4-1-out.img \
     /mnt/rescuedata/"$(date +'%Y-%m-%d')"-rpicm4-1-lite.img
 
-printf "$0 Completed in %s\n\n" "$(displaytime ${SECONDS})"
+printf "$0 Completed in %s\n\n" "$(displaytime ${SECONDS})."

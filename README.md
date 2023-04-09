@@ -14,14 +14,21 @@ Raspberry Pi SSD/SD Card Image Manager
 
 ## To Do
 
-* Write a plugin (probably) to expire password to force a password change on 1st login.
-* Write a plugin to upgrade to testing.  Bullseye at the minute.  Test is sid would work.  Current code in 20bookworm-backports.  This may allow 1 plugin for backports!
-* Consider moving bookworm-sources.list to sources.list.d & removing sources.list.  This would be part of the upgrade plugin above.  Current code is in 20bookworm-backports.
-* Write a plugin to remove unwanted/unneeded apps.  triggerhappy, dphys-swapfile (if zram-tools is installed / to be installed)
-* Light mode for coloured output for logs.  Think about html output for the webui.
+* Write a plugin (probably) to expire password to force a password change apon the 1st interactive login.
+* Write a plugin to upgrade to testing release.  Bullseye at the moment.  Test is sid would work.  Current code in <a href="local-plugins/20bookworm-backports">20bookworm-backports</a>.  This may allow 1 plugin for backports!
+* Consider moving `bookworm-sources.list` to `sources.list.d/` & removing `sources.list`.  This would be part of the upgrade plugin above.  Current code is in <a href="local-plugins/20bookworm-backports">20bookworm-backports</a>.
+* Write a plugin to remove unwanted/unneeded apps.  `triggerhappy`, `dphys-swapfile` (if `zram-tools` is installed or is to be installed).  Maybe remove `dphys-swapfile`at the same time as installing `zram-tools`.
+* Light mode for coloured output of logs.  Think about html output for the webui (see below).
 * Design/Build web api and webui.
 * Split up plugin 70devtools* into indervidual plugins per app.
 * Move downloading keys and adding repos to stage 0 (Mounted environment) in 70devtools pluin.
+* <a href="local-plugins/10mydotfiles">10mydotfiles</a>:	Seperate the copying of the assets directory into a seperate plugin.  Pass a list of files to install as arguments or a file containing the list.
+* <a href="local-pugins/30configgit">30configgit</a>: Add name, email and default branch as arduments to the script.
+* <a href="local-plugins/50setnfsroot">50setnfsroot</a>: Look at using sed to edit the stock `config.txt` and `fstab` files.
+* <a href="local-plugins/70devtools_bookworm">70devtools_bookworm</a>:	Add args for apt-get's [no]install-recomends parameter.  Add args for using a file for a list of packages to install.  Alternativly, break down into multiple plugins, 1 for each package.
+* <a href="local-plugins/70devtools_bullseye">70devtools_bullseye</a>:	As 70devtools_bookworm.
+* <a href="local-plugins/80k3s">80k3s</a>:  Pass args for `INSTALL_K3S_*` environment variables used in the install script.
+* Enable setting the machine host key rather than using a generated one.  This is to prevent ssh rejecting logins if the host os has been reinstalled.  Currently requires the key being removed from `{home}/known_hosts` on the client if the host is rebuilt.
 
 ## Description
 

@@ -5,8 +5,11 @@ set -e
 function pluginHelp(){
     # tabs in heredoc added with vscode keybinding ctrl+k [tab]
     cat <<-EOF 1>&2
+		I: plugin: '${pfx}' phase: '${phase:-help}'
+		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
-		This is an sdm plugin for: ${me}.  This is a test plugin to experiment with code.
+		This is an sdm plugin for: ${pfx}.  This is a plugin to install k3s, A lightweight kubernetes.
+		It will download and run the install script from get.k3s.io.
 
 		The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
 		'\$1' is the phase: "0", "1", or "post-install"
@@ -14,27 +17,32 @@ function pluginHelp(){
 
 		Valid arguments to this plugin are:-
 		    assetDir    -   Directory where local assets such as common.sh are stored.
-            DEBUG       -   Debug level for debug messages and breakpoints.
-            LOGPREFIX   -   Prefix for debug log messages
+		    DEBUG       -   Debug level for debug messages and breakpoints.
+		    LOGPREFIX   -   Prefix for debug log messages
+
+		Example:    --plugin ${pfx}:assetDir=/home/username/my-sdm-assets|DEBUG=1|LOGPREFIX=cutomise-script.sh"
+
+		To do:       Pass args for INSTALL_K3S_* environment variables used in the install script.
+
+		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
 	EOF
 }
 #
 # Main code for the Plugin
 #
-phase=${1}
-me="$(basename "${0}")"
-pfx="${me} Phase ${phase}"     #For messages
-args="${2}"
+phase=${1:-help}
+pfx="$(basename "$0")"     #For messages
+args="$2"
 #
 # Check that phase is set to check if we are running within sdm.  If not set 
 # or set to help, then display help text & exit.
 #
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
-# shellcheck source=/dev/null
+# shellcheck source=../sdm-readparams
 source "$SDMPT"/etc/sdm/sdm-readparams
-plugin_getargs "$me" "$args" "|assetDir|DEBUG|LOGPREFIX|"
+plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|"
 #
 copiedCommon=0
 if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ] 
@@ -43,7 +51,7 @@ then
     ${cpCmd:-} -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh && copiedCommon=3
 fi
 #
-# shellcheck source=/dev/null
+# shellcheck source=../assets/common.sh
 source "$SDMPT"/etc/sdm/local-assets/common.sh || exit 1
 fDebugLog 2 "* Plugin ${pfx}: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno
 #

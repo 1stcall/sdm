@@ -91,5 +91,5 @@ fDebugLog 3 "${LYELLOW}----------------------------------------"
 
 ENDBUILD=$(date)
 fDebugLog 1 "${scriptName} started at ${STARTBUILD} and compleated at ${ENDBUILD}."
-log "${scriptName} completed in $(displaytime $(( $(date +%s) - $STARTSEC )))"
+log "${scriptName} completed in $(displaytime $(( $(date +%s) - $STARTSEC )))."
 exit 0

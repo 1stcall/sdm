@@ -137,5 +137,5 @@ fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 
 ENDBUILD=$(date)
 fDebugLog 1 "${scriptName} started at ${STARTBUILD} and compleated at ${ENDBUILD}."
-echo 1>&2 "${scriptName} completed in $(displaytime $(( $(date +%s) - $STARTSEC )))"
+echo 1>&2 "${scriptName} completed in $(displaytime $(( $(date +%s) - $STARTSEC )))."
 exit 0

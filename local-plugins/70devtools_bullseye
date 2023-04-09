@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 #
+set -e
+#
 function pluginHelp(){
     # tabs in heredoc added with vscode keybinding ctrl+k [tab]
     cat <<-EOF 1>&2
-		I: 'phase: ${phase}'
+		I: plugin: '${pfx}' phase: '${phase:-help}'
+		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
 		This is an sdm plugin for: ${pfx}.  This installs some tools that I use in my development environments.
 
@@ -13,8 +16,16 @@ function pluginHelp(){
 
 		Valid arguments to this plugin are:-
 		    assetDir    -   Directory where local assets such as common.sh are stored.
-            DEBUG       -   Debug level for debug messages and breakpoints.
-            LOGPREFIX   -   Prefix for debug log messages
+		    DEBUG       -   Debug level for debug messages and breakpoints.
+		    LOGPREFIX   -   Prefix for debug log messages
+
+		Example:    --plugin ${pfx}:assetDir=/home/username/my-sdm-assets|DEBUG=1|LOGPREFIX=cutomise-script.sh"
+
+		To do:       Add args for apt-get's [no]install-recomends parameter.
+		            Add args for using a file for a list of packages to install.
+		            Alternativly, break down into multiple plugins, 1 for each package.
+
+		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
 	EOF
 }
@@ -31,7 +42,7 @@ args="$2"
 #[[ -z ${phase} ]] || [[ ${phase} =~ help ]] && pluginHelp && exit 0
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
-# shellcheck source=/dev/null
+# shellcheck source=../sdm-readparams
 source "$SDMPT"/etc/sdm/sdm-readparams
 plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|"
 #
@@ -40,7 +51,7 @@ then
     cp -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
 fi
 #
-# shellcheck source=/dev/null
+# shellcheck source=../assets/common.sh
 source "$SDMPT"/etc/sdm/local-assets/common.sh
 fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
 #

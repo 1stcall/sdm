@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 #
+set -e
+#
 function pluginHelp(){
     # tabs in heredoc added in vscode with keybinding ctrl+k [tab]
     cat <<-EOF 1>&2
-		I: 'phase: ${phase:-help}'
+		I: plugin: '${pfx}' phase: '${phase:-help}'
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
 		This is an sdm plugin for: ${pfx}.  This plugin configures my server to act as a netboot/pxe host.
@@ -24,8 +26,8 @@ function pluginHelp(){
 		                    ** You need to escape the commas (\,). **
 		    tftpRootDir -   The root of the TFTP server that provides the /boot files.
 		    nfsRootDir  -   The root of the NFS server that provides the /root files.
-            DEBUG       -   Debug level for debug messages and breakpoints.
-            LOGPREFIX   -   Prefix for debug log messages
+		    DEBUG       -   Debug level for debug messages and breakpoints.
+		    LOGPREFIX   -   Prefix for debug log messages
 
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 	EOF
@@ -42,7 +44,7 @@ args="$2"
 #
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
-# shellcheck source=/dev/null
+# shellcheck source=../sdm-readparams
 source "$SDMPT"/etc/sdm/sdm-readparams
 plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|netIface|ipAddr|dnsaddr|brdAddr|gwAddr|dhcpRange|tftpRootDir|nfsRootDir|"
 #
@@ -51,7 +53,7 @@ then
     ${cpCmd:-} "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
 fi
 #
-# shellcheck source=/dev/null
+# shellcheck source=../assets/common.sh
 source "$SDMPT"/etc/sdm/local-assets/common.sh
 fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
 #

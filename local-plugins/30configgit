@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 #
+set -e
+#
 function pluginHelp(){
     # tabs in heredoc added with vscode keybinding ctrl+k [tab]
     cat <<-EOF 1>&2
-		I: 'phase: ${phase:-help}'
+		I: plugin: '${pfx}' phase: '${phase:-help}'
+		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
-		This is an sdm plugin for: ${pfx}.  This configures my git environment.
+		This is an sdm plugin for: ${pfx}.  This configures my git environment.  It will install the git
+		package and configure my name, email address and sets my default branch to dev.
 
 		The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
 		'\$1' is the phase: "0", "1", or "post-install"
@@ -13,8 +17,12 @@ function pluginHelp(){
 
 		Valid arguments to this plugin are:-
 		    assetDir    -   Directory where local assets such as common.sh are stored.
-            DEBUG       -   Debug level for debug messages and breakpoints.
-            LOGPREFIX   -   Prefix for debug log messages
+		    DEBUG       -   Debug level for debug messages and breakpoints.
+		    LOGPREFIX   -   Prefix for debug log messages
+
+		To do:  Add name, email and default branch as arduments to the script.
+
+		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
 	EOF
 }
@@ -30,7 +38,7 @@ args="$2"
 #
 [[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
 #
-# shellcheck source=/dev/null
+# shellcheck source=../sdm-readparams
 source "$SDMPT"/etc/sdm/sdm-readparams
 #DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
 plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|"
@@ -40,7 +48,7 @@ then
     cp -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
 fi
 #
-# shellcheck source=/dev/null
+# shellcheck source=../assets/common.sh
 source "$SDMPT"/etc/sdm/local-assets/common.sh
 fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
 #

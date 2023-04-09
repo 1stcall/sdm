@@ -494,7 +494,7 @@ $rsyncCommand "$temporyMountPoint/rootfs"/ "${outputRootDir}" || errorExit "Erro
 $rsyncCommand "$temporyMountPoint/bootfs"/ "${outputBootDir}" || errorExit "Error copying '$temporyMountPoint/bootfs' to '${outputBootDir}/'."
 
 cleanUp
-(( VERBOSE >= 1 )) && log "Exiting Cleanly & without any errors."
+(( VERBOSE >= 1 )) && log "${scriptLongName} exiting cleanly & without any errors."
 
 exit 0
 ################################################################################################################################################
