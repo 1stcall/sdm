@@ -225,7 +225,7 @@ function sdm_burndevfile() {
 	[ -f $burnfilefile ] && errexit "? Output IMG file '$burnfilefile' exists"
 	write_burnmsg "* Burn '$dimg' to Output IMG '$burnfilefile'..."
 	burnmsg+=("$(thisdate) > Burn IMG command line: $cmdline")
-	ddcmd="dd if=$dimg of=$burnfilefile status=progress $ddsw"
+	ddcmd="cp -va --reflink=auto $dimg $burnfilefile"
 	burnmsg+=("$(thisdate) > dd command: $ddcmd")
 	# Burn the IMG to the file
 	echo "$ddcmd"
@@ -241,7 +241,7 @@ function sdm_burndevfile() {
 	setdiskid $loopdev $newdiskid
 	losetup -d $loopdev
 	domount "$burnfilefile"
-	expandroot=1           # Force Expand Root into the newly written IMG so it will happen when burned to something with sdm
+#	expandroot=1           # Force Expand Root into the newly written IMG so it will happen when burned to something with sdm
     fi
     write_burnmsg "> Set new Disk ID '$newdiskid' in /etc/fstab and /boot/cmdline.txt"
     sed -i "s/${olddiskid}/${newdiskid}/g" $SDMPT/etc/fstab

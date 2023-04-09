@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+#
+set -e
+#
+function pluginHelp(){
+    # tabs in heredoc added with vscode keybinding ctrl+k [tab]
+    cat <<-EOF 1>&2
+
+		This is an sdm plugin for: ${me}.  This is a test plugin to experiment with code.
+
+		The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
+		'\$1' is the phase: "0", "1", or "post-install"
+		'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...4
+
+		Valid arguments to this plugin are:-
+		    assetDir    -   Directory where local assets such as common.sh are stored.
+            DEBUG       -   Debug level for debug messages and breakpoints.
+            LOGPREFIX   -   Prefix for debug log messages
+
+	EOF
+}
+#
+# Main code for the Plugin
+#
+phase=${1}
+me="$(basename "${0}")"
+pfx="${me} Phase ${phase}"     #For messages
+args="${2}"
+#
+# Check that phase is set to check if we are running within sdm.  If not set 
+# or set to help, then display help text & exit.
+#
+[[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
+#
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/sdm-readparams
+plugin_getargs "$me" "$args" "|assetDir|DEBUG|LOGPREFIX|"
+#
+copiedCommon=0
+if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ] 
+then
+    copiedCommon=1
+    ${cpCmd:-} -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh && copiedCommon=3
+fi
+#
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/local-assets/common.sh || exit 1
+fDebugLog 2 "* Plugin ${pfx}: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno
+#
+if [[ "$phase" == "0" ]]
+then
+    #
+    # In Phase 0 (Mounted environment) all references to directories in the image must be preceded by $SDMPT
+    #
+    fDebugLog 1 "* Plugin ${pfx}: Start Phase."
+    fDebugLog 2 "Plugin $pfx: Nothing to do."
+    fDebugLog 1 "* Plugin $pfx: Complete Phase." yesno
+    #
+elif [[ "$phase" == "1" ]]
+then
+    #
+    # Phase 1 (in nspawn)
+    #
+    fDebugLog 1 "* Plugin $pfx: Start Phase."
+    fDebugLog 3 "$(plugin_printkeys)"
+    #
+    fDebugLog 2 "Plugin $pfx: Installing k3s from https://get.k3s.io."
+    curl -sfL https://get.k3s.io | INSTALL_K3S_SKIP_START=True INSTALL_K3S_EXEC=server INSTALL_K3S_CHANNEL=latest sh -
+    #
+    fDebugLog 1 "* Plugin $pfx: Complete Phase." yesno
+    #
+else
+    #
+    # Plugin Phase 2 (post-install) edits
+    #
+    fDebugLog 1 "* Plugin $pfx: Start Phase."
+    fDebugLog 3 "$(plugin_printkeys)"    
+    fDebugLog 2 "Plugin $pfx: Nothing to do."
+    fDebugLog 1 "* Plugin $pfx: Complete Phase." yesno
+fi

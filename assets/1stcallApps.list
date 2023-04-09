@@ -1,0 +1,7 @@
+zram-tools 
+command-not-found bash-completion 
+tmux 
+apt-transport-https
+acl
+#apt-listbugs apt-listchanges
+curl

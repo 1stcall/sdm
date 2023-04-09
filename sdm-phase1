@@ -128,7 +128,7 @@ case "$cmd" in
     apt)
 	logtoboth "* Start apt maintenance"
 	logfreespace "at start of 'apt $cmdoptions'"
-	[[ "$cmdoptions" =~ "update" ]] &&  logtoboth "> Perform 'apt update'" && (doapt "--yes update"  0 || logapterror)
+	[[ "$cmdoptions" =~ "update" ]] &&  logtoboth "> Perform 'apt update'" && (doapt "--yes update" $showapt || logapterror)
 	[[ "$cmdoptions" =~ "upgrade" ]] && logtoboth "> Perform 'apt $upg'" && upgkeepconf --yes 0 $aptdistupgrade
 	[[ "$cmdoptions" =~ "autoremove" ]] && logtoboth "> Perform 'apt autoremove'" && (doapt "--yes autoremove" 0 || logapterror)
 	cklogfreespace "at end of 'apt $cmdoptions'"
@@ -310,6 +310,7 @@ then
     if [ ! -f /etc/sudoers.d/010_$myuser-nopasswd ]
     then
 	logtoboth "> Add user '$myuser' to sudoers.d"
+    mkdir -p /etc/sudoers.d/
 	echo "$myuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/010_$myuser-nopasswd
 	chmod 440 /etc/sudoers.d/010_$myuser-nopasswd
     fi
@@ -321,7 +322,7 @@ puser="'$myuser'"
 susers="user"
 if [ $fnopassword -eq 0 ]
 then
-    [ ${raspiosver} -ge 11 ] && oldpios=0 || oldpios=1
+    [ ${raspiosver:-11} -ge 11 ] && oldpios=0 || oldpios=1
 
     [ $oldpios -eq 1 -a "$myuser" != "pi" -a $frenamepi -eq 0 ] && puser="${puser} and 'pi'" && susers="users"        # Only ask about pi on older systems
     [ $rootpwd -eq 1 ] && puser="${puser} and 'root'" && susers="users"

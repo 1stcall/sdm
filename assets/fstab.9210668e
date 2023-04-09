@@ -1,0 +1,4 @@
+proc                                    /proc       proc    defaults                        0 0
+#
+192.168.1.1:/srv/netboot/tftp/9210668e  /boot       nfs     defaults,vers=4.2,proto=tcp     0 0
+192.168.1.1:/srv/netboot/nfs/9210668e   /           nfs     defaults,vers=4.2,proto=tcp     0 0

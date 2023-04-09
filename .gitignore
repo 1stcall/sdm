@@ -1,0 +1,7 @@
+baseos/
+output/
+*.log
+*.out
+*.img
+delme*
+#scratch/

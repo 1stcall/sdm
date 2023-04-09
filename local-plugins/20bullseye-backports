@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+#
+function pluginHelp(){
+    # tabs in heredoc added with vscode keybinding ctrl+k [tab]
+    cat <<-EOF 1>&2
+		I: 'phase: ${phase}'
+
+		This is an sdm plugin for: ${pfx}.  This configures apt to use the bullseye-backports repository.
+
+		The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
+		'\$1' is the phase: "0", "1", or "post-install"
+		'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
+
+		Valid arguments to this plugin are:-
+		    assetDir    -   Directory where local assets such as common.sh are stored.
+            DEBUG       -   Debug level for debug messages and breakpoints.
+            LOGPREFIX   -   Prefix for debug log messages
+
+	EOF
+}
+#
+# Main code for the Plugin
+#
+phase=${1}
+pfx="$(basename "$0")"     #For messages
+args="$2"
+#
+# Check that phase is set to check if we are running within sdm.  If not set 
+# or set to help, then display help text & exit.
+#
+[[ ! "0 1 post-install" =~ (^| )${phase}($| ) ]] && pluginHelp && exit 0
+#
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/sdm-readparams
+#DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
+plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|"
+#
+if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ] 
+then 
+    cp -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
+fi
+#
+# shellcheck source=/dev/null
+source "$SDMPT"/etc/sdm/local-assets/common.sh
+fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
+#
+if [[ "$phase" == "0" ]]
+then
+    #
+    # In Phase 0 all references to directories in the image must be preceded by $SDMPT
+    #
+    fDebugLog 1 "* Plugin $pfx: Start Phase 0 (Mounted environment)"
+    #
+    # Print the keys found (example usage). plugin_getargs returns the list of found keys in $foundkeys
+    #
+    fDebugLog 3 "$(plugin_printkeys)"
+    #
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/backports.list > $SDMPT/etc/apt/sources.list.d/"
+    ${cpCmd:-} "$assetDir"/bullseye-backports.list "$SDMPT"/etc/apt/sources.list.d/
+    #
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/bullseye-90_backports > $SDMPT/etc/apt/preferences.d/"
+    $cpCmd "$assetDir"/bullseye-90_backports "$SDMPT"/etc/apt/preferences.d/90_backports
+    #
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
+    #
+elif [[ "$phase" == "1" ]]
+then
+    #
+    # Phase 1 (in nspawn)
+    #
+    fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
+    fDebugLog 2 "* Plugin $pfx: Nothing to do"
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" wait
+    #
+else
+    #
+    # Plugin Post-install edits
+    #
+    fDebugLog 1 "* Plugin $pfx: Start Phase post-install"
+    fDebugLog 2 "* Plugin $pfx: Nothing to do"
+    fDebugLog 1 "* Plugin $pfx: Complete Phase post-install" wait
+fi

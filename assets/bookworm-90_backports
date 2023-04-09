@@ -1,0 +1,7 @@
+Package: *
+Pin: release a=bookworm-backports
+Pin-Priority: 950
+
+Package: *
+Pin: release a-bullseye*
+Pin-Priority: 1

@@ -116,7 +116,7 @@ function islooped() {
     local fn=$(realpath $1) fl=1
     while read line
     do
-        [[ "$line" =~ "$fn" ]] && fl=0
+        [[ "$line" = "$fn" ]] && fl=0
     done < <(losetup -a)
 
     return $fl
@@ -140,6 +140,8 @@ function domount() {
 	notmounted $SDMPT/boot && errexit "? Error mounting --bind '$dimg'"
     elif [ $dimgdev -eq 0 ]
     then
+#    losetup --detach-all
+    [ "$loopdev" != "" ] && losetup -d $loopdev && loopdev=""
 	islooped $mimg && errexit "? IMG '$mimg' already attached to a loop device"
 	echo "* Mount IMG '$mimg'"
 	loopdev=$(losetup --show -P -f $mimg)
@@ -194,7 +196,8 @@ function extendimage() {
     local ldimg=$1 limgext=$2
     local line dsiz
     trap "ctrlcexit" SIGINT
-    dd if=/dev/zero bs=1M count=$limgext status=progress >> $ldimg 
+#    dd if=/dev/zero bs=1M count=$limgext status=progress >> $ldimg 
+    truncate --size="+${limgext}M" "${ldimg}"
     ddsts=$?
     trap SIGINT
     [ $ddsts -ne 0 ] && errexit "? Exiting due to dd error"
@@ -1279,7 +1282,7 @@ else
     mkdir -p $SDMPT/$sdmdir/1piboot
     for f in $sdmflist
     do
-	cp -a $src/$f $SDMPT/$sdmdir
+	cp -av $src/$f $SDMPT/$sdmdir
     done
     rm -f $SDMPT/usr/local/bin/sdm
     ln -s $sdmdir/sdm $SDMPT/usr/local/bin
