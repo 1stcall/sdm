@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 #
-declare STARTSEC=$(date +%s)
-declare STARTBUILD=$(date --date="@${STARTSEC}")
-declare ENDBUILD=
-declare DEBUG=${DEBUG:-0}
-declare BASEIMG=${BASEIMG:-""}
+declare STARTSEC
+STARTSEC=$(date +%s)
+declare STARTBUILD
+STARTBUILD=$(date --date="@${STARTSEC}")
+declare ENDBUILD
+ENDBUILD=
+declare DEBUG
+DEBUG=${DEBUG:-0}
+declare BASEIMG
+BASEIMG=${BASEIMG:-""}
 #
 [ "$DEBUG" -ge 10 ]  && set -o errtrace         # If set, the ERR trap is inherited by shell functions.
 [ "$DEBUG" -ge 10 ]  && set -o errexit          # Exit immediately if a command exits with a non-zero status.
@@ -28,7 +33,7 @@ while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
     [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 baseDir=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
-scriptName=$(basename "$(realpath ${BASH_SOURCE[0]})")
+scriptName=$(basename "$(realpath "${BASH_SOURCE[0]}")")
 scriptName=${scriptName%%.*}
 source "${baseDir}/assets/common.sh"
 logname="${baseDir}/logs/${scriptName}.log"
@@ -39,11 +44,12 @@ if [[ $BASEIMG == "" ]]; then
     fDebugLog 3 "${LYELLOW}--------------------------------------------------"
     fDebugLog 3 "${LYELLOW}| Start Output from get_latest_pios.sh --test    |"
     fDebugLog 3 "${LYELLOW}--------------------------------------------------"
-    downloadUrl="$(${baseDirectory}/get_latest_pios.sh --test)"
+    downloadUrl="$("${baseDirectory}"/get_latest_pios.sh --test)"
     fDebugLog 3 "${LYELLOW}--------------------------------------------------"
     fDebugLog 3 "${LYELLOW}| End Output from get_latest_pios.sh --test      |"
     fDebugLog 3 "${LYELLOW}--------------------------------------------------"
-    baseImage=$(echo ${downloadUrl} | sed 's:.*/::')
+# shellcheck disable=SC2001
+    baseImage=$(echo "${downloadUrl}" | sed 's:.*/::')
     baseImage=${baseImage::-3}
 else
     fDebugLog 2 "Skipping get_latest_pios because BASEIMG is set ($BASEIMG)"
@@ -69,7 +75,7 @@ fDebugLog 4 "Proceed with settings." yesno 4 || errexit "User aborted."
 if [[ ! -d "${baseDirectory}/${baseImageDirectory}/" ]]
 then
     fDebugLog 2 "Making directory ${baseDirectory}/${baseImageDirectory}/."
-    su ${callingUser} --command="$mkdirCmd ${baseDirectory}/${baseImageDirectory}/"
+    su "${callingUser}" --command="$mkdirCmd ${baseDirectory}/${baseImageDirectory}/"
 else
     fDebugLog 2 "Skipping Making directory ${baseDirectory}/${baseImageDirectory}/ because it already exists."
 fi
@@ -81,7 +87,7 @@ if [[ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ]] ; then
     fDebugLog 0 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
     fDebugLog 4 "Proceed with download." yesno 4 || errexit "User aborted."
     curlOps="" && [ "$DEBUG" -ge 2 ] && curlOps="--verbose"
-    su ${callingUser} --command="curl $curlOps $downloadUrl | unxz - > ${baseDirectory}/${baseImageDirectory}/${baseImage}"
+    su "${callingUser}" --command="curl $curlOps $downloadUrl | unxz - > ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 else
     fDebugLog 2 "Skipping Downloading & extracting ${downloadUrl} because $baseImage alreay exists."
     fDebugLog 2 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
@@ -90,7 +96,7 @@ fi
 if [[ ! -d "${baseDirectory}/output/" ]]
 then
     fDebugLog 2 "Making directory ${baseDirectory}/output/"
-    su ${callingUser} --command="$mkdirCmd ${baseDirectory}/output/"
+    su "${callingUser}" --command="$mkdirCmd ${baseDirectory}/output/"
 else
     fDebugLog 2 "Skipping Making directory ${baseDirectory}/output/ because it alreay exists."
 fi
@@ -118,6 +124,7 @@ sdmCmd="${sdmCmd} --password-pi letmein123"
 #sdmCmd="${sdmCmd} --user carl"
 #sdmCmd="${sdmCmd} --password-user letmein123"
 #sdmCmd="${sdmCmd} --plugin apt-file"
+# shellcheck disable=SC2089
 sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/10mydotfiles:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 #sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/20bullseye-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/20bookworm-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
@@ -130,6 +137,7 @@ fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 fDebugLog 3 "${LYELLOW}| Start Output from sdm --custmoize              |"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
+# shellcheck disable=SC2090
 ${sdmCmd}
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 fDebugLog 3 "${LYELLOW}| End Output from sdm --custmoize                |"
@@ -137,5 +145,5 @@ fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 
 ENDBUILD=$(date)
 fDebugLog 1 "${scriptName} started at ${STARTBUILD} and compleated at ${ENDBUILD}."
-echo 1>&2 "${scriptName} completed in $(displaytime $(( $(date +%s) - $STARTSEC )))."
+echo 1>&2 "${scriptName} completed in $(displaytime $(( $(date +%s) - STARTSEC )))."
 exit 0

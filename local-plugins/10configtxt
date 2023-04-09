@@ -5,7 +5,7 @@ set -e
 function pluginHelp(){
     # tabs in heredoc added with vscode keybinding ctrl+k [tab]
     cat <<-EOF
-    
+
 		I: plugin: '${pfx}' phase: '${phase:-help}'
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
@@ -62,7 +62,7 @@ then
     #
     fDebugLog 1 "* Plugin $pfx: Updating /boot/config.txt"
     cp -v "$SDMPT"/boot/config.txt "$SDMPT"/boot/config.txt.orig
-    sed -e "/\[cm4\]/,/^[[:blank:]]*$/{" -e "\|^[[:blank:]]*$|s|.*|dtoverlay=i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host\ndtparam=i2c_vc=on\n&|g" -e "}" $SDMPT/boot/config.txt.orig | ${teeCmd} $SDMPT/boot/config.txt
+    sed -e "/\[cm4\]/,/^[[:blank:]]*$/{" -e "\|^[[:blank:]]*$|s|.*|dtoverlay=i2c-rtc,pcf85063a,i2c_csi_dsi,dwc2,dr_mode=host\ndtparam=i2c_vc=on\n&|g" -e "}" "$SDMPT"/boot/config.txt.orig | ${teeCmd} "$SDMPT"/boot/config.txt
     #
     fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)"
     #
