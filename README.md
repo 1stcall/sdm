@@ -23,7 +23,7 @@ Raspberry Pi SSD/SD Card Image Manager
 * Split up plugin `70devtools*` into indervidual plugins per app.
 * Move downloading keys and adding repos to stage 0 (Mounted environment) in `70devtools*` pluin.
 * <a href="local-plugins/10mydotfiles">10mydotfiles</a>:	Seperate the copying of the assets directory into a seperate plugin.  Pass a list of files to install as arguments or a file containing the list.
-* <a href="local-pugins/30configgit">30configgit</a>: Add name, email and default branch as arduments to the script.
+* <a href="local-plugins/30configgit">30configgit</a>: Add name, email and default branch as arduments to the script.
 * <a href="local-plugins/50setnfsroot">50setnfsroot</a>: Look at using sed to edit the stock `config.txt` and `fstab` files.
 * <a href="local-plugins/70devtools_bookworm">70devtools_bookworm</a>:	Add args for apt-get's [no]install-recomends parameter.  Add args for using a file for a list of packages to install.  Alternativly, break down into multiple plugins, 1 for each package.
 * <a href="local-plugins/70devtools_bullseye">70devtools_bullseye</a>:	As 70devtools_bookworm.
