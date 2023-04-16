@@ -5,3 +5,7 @@ apt-transport-https
 acl
 #apt-listbugs apt-listchanges
 curl
+bind9-dnsutils
+lsof
+neofetch
+bind9-dnsutils
