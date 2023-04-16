@@ -15,7 +15,7 @@ Raspberry Pi SSD/SD Card Image Manager
 ## To Do
 
 * Write a plugin (probably) to expire password to force a password change apon the 1st interactive login.
-* Write a plugin to upgrade to testing release.  Bullseye at the moment.  Test is sid would work.  Current code in <a href="local-plugins/20bookworm-backports">20bookworm-backports</a>.  This may allow 1 plugin for backports!
+* Write a plugin to upgrade to testing release.  Bullseye at the moment.  Test is sid would work.  Current code in <a href="local-plugins/20bookworm-backports">20bookworm-backports</a> and <a href="local-plugins/70devtools_bookworm">70devtools_bookworm</a>.  This may allow 1 plugin for backports!
 * Consider moving `bookworm-sources.list` to `sources.list.d/` & removing `sources.list`.  This would be part of the upgrade plugin above.  Current code is in <a href="local-plugins/20bookworm-backports">20bookworm-backports</a>.
 * Write a plugin to remove unwanted/unneeded apps.  `triggerhappy`, `dphys-swapfile` (if `zram-tools` is installed or is to be installed).  Maybe remove `dphys-swapfile`at the same time as installing `zram-tools`.
 * Light mode for coloured output of logs.  Think about html output for the webui (see below).
