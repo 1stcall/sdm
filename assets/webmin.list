@@ -1,0 +1,1 @@
+deb [signed-by=/usr/share/keyrings/debian-webmin.gpg] https://download.webmin.com/download/repository sarge contrib

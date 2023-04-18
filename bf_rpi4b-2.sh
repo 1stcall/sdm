@@ -29,7 +29,7 @@ while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 baseDir=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
-scriptName=$(basename "$(realpath ${BASH_SOURCE[0]})")
+scriptName=$(basename "$(realpath "${BASH_SOURCE[0]}")")
 scriptName=${scriptName%%.*}
 source "${baseDir}/assets/common.sh"
 logname="${baseDir}/logs/${scriptName}.log"
@@ -39,19 +39,19 @@ fDebugLog 1 "callingUser=${callingUser}"
 fDebugLog 1 "baseDirectory=${baseDirectory}"
 fDebugLog 1 "hostName=${hostName}"
 
-if [[ -f "${baseDirectory}/output/${hostName}-out.img" ]] ; then
-    if [[ -f "${baseDirectory}/output/${hostName}-out.img.old" ]] ; then
-        fDebugLog 1 "Removing old backup file ${baseDirectory}/output/${hostName}-out.img.old"
-        rm -f "${baseDirectory}/output/${hostName}-out.img.old"
+if [[ -f "${baseDirectory}/output/${hostName}-${RELEASE}-out.img" ]] ; then
+    if [[ -f "${baseDirectory}/output/${hostName}-${RELEASE}-out.img.old" ]] ; then
+        fDebugLog 1 "Removing old backup file ${baseDirectory}/output/${hostName}-${RELEASE}-out.img.old"
+        rm -f "${baseDirectory}/output/${hostName}-${RELEASE}-out.img.old"
     fi
-    fDebugLog 1 "Backing up existing image ${baseDirectory}/output/${hostName}-out.img"
-    mv -v "${baseDirectory}/output/${hostName}-out.img" "${baseDirectory}/output/${hostName}-out.img.old"
+    fDebugLog 1 "Backing up existing image ${baseDirectory}/output/${hostName}-${RELEASE}-out.img"
+    mv -v "${baseDirectory}/output/${hostName}-${RELEASE}-out.img" "${baseDirectory}/output/${hostName}-${RELEASE}-out.img.old"
 fi
 
 fDebugLog 1 "${scriptName} is Running ${baseDirectory}/sdm --burnfile"
 fDebugLog 4 "Proceed running with running command." yesno 4 || errexit "User aborted."
 sdmCmd="${baseDirectory}/sdm"
-sdmCmd="${sdmCmd} --burnfile ${baseDirectory}/output/${hostName}-out.img"
+sdmCmd="${sdmCmd} --burnfile ${baseDirectory}/output/${hostName}-${RELEASE}-out.img"
 sdmCmd="${sdmCmd} --host ${hostName}.1stcall.uk"
 sdmCmd="${sdmCmd} --regen-ssh-host-keys"
 sdmCmd="${sdmCmd} --logwidth 999"
@@ -72,7 +72,7 @@ fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 fDebugLog 3 "${LYELLOW}| End Output from sdm --burnfile                 |"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 
-sdmCmd="${baseDirectory}/sdm --shrink ${baseDirectory}/output/${hostName}-out.img"
+sdmCmd="${baseDirectory}/sdm --shrink ${baseDirectory}/output/${hostName}-${RELEASE}-out.img"
 fDebugLog 1 "Running ${sdmCmd}"
 fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
 fDebugLog 3 "${LYELLOW}----------------------------------------"
@@ -85,5 +85,5 @@ fDebugLog 3 "${LYELLOW}----------------------------------------"
 
 ENDBUILD=$(date)
 fDebugLog 1 "${scriptName} started at ${STARTBUILD} and compleated at ${ENDBUILD}."
-log "${scriptName} completed in $(displaytime $(( $(date +%s) - $STARTSEC )))."
+log "${scriptName} completed in $(displaytime $(( $(date +%s) - STARTSEC )))."
 exit 0

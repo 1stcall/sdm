@@ -4,7 +4,7 @@ set -e
 #
 function pluginHelp(){
     # tabs in heredoc added with vscode keybinding ctrl+k [tab]
-    cat <<-EOF 1>&2
+    cat <<-EOF
 		I: plugin: '${pfx}' phase: '${phase:-help}'
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
@@ -51,7 +51,7 @@ copiedCommon=0
 if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ] 
 then
     copiedCommon=1
-    ${cpCmd:-} "${assetDir:-}/common.sh" "${SDMPT}/etc/sdm/local-assets/common.sh" && copiedCommon=3
+    cp -av "${assetDir:-}/common.sh" "${SDMPT}/etc/sdm/local-assets/common.sh" && copiedCommon=3
 fi
 #
 # shellcheck source=../assets/common.sh

@@ -3,22 +3,23 @@
 set -e
 #
 function pluginHelp(){
-    # tabs in heredoc added with vscode keybinding ctrl+k [tab]
+    # 2 X tabs in heredoc added with vscode keybinding ctrl+k [tab]
     cat <<-EOF
 
 		I: plugin: '${pfx}' phase: '${phase:-help}'
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
-		This is an sdm plugin for: ${pfx}.  This is a template to be used for new plugins.
+		This is an sdm plugin for: ${pfx}.  This plugin will configure apt to use the backports repository.
 
 		The plugin is called three times: for Phase 0 (Mounted environment), Phase 1 (in nspawn), and Phase 2 (post-install).
 		'\$1' is the phase: "0", "1", or "post-install"
-		'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...4
+		'\$2' is the argument list: arg1=val1|arg2=val2|arg3=val3| ...
 
 		Valid arguments to this plugin are:-
-		    assetDir    -   Directory where local assets such as common.sh are stored.
-		    DEBUG       -   Debug level for debug messages and breakpoints.
-		    LOGPREFIX   -   Prefix for debug log messages
+		    assetDir        -   Directory where local assets such as common.sh are stored.
+		    DEBUG           -   Debug level for debug messages and breakpoints.
+		    LOGPREFIX       -   Prefix for debug log messages
+		    upgradeRelease  -   Release to upgrade to.  Valid option is currently bookworm.  Defaults to bookworm if empty.
 
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
@@ -38,19 +39,20 @@ args="$2"
 #
 # shellcheck source=../sdm-readparams
 source "$SDMPT"/etc/sdm/sdm-readparams
-plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|"
+#DEBUG=${custom1:-0} && LOGPREFIX=${custom2:-"${pfx}"}
+plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|upgradeRelease|"
 #
-# TODO Check that we're in phase 0 b4 we try to copy common.sh.  If not and common.sh is not in the image, then bailout with an error.
-copiedCommon=0
-if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ]
-then
-    copiedCommon=1
-    cp -av "${assetDir:-}/common.sh" "$SDMPT/etc/sdm/local-assets/common.sh" && copiedCommon=3
+if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ] 
+then 
+    cp -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
 fi
 #
 # shellcheck source=../assets/common.sh
 source "$SDMPT"/etc/sdm/local-assets/common.sh
-fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh copiedCommon=${copiedCommon}" yesno
+fDebugLog 2 "* Plugin $pfx: Sucessfully sourced $SDMPT/etc/sdm/local-assets/common.sh " wait
+#
+# Default to sid if upgradeRelease is empty.
+upgradeRelease=${upgradeRelease:-bookworm} 
 #
 if [[ "$phase" == "0" ]]
 then
@@ -60,7 +62,14 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase 0 (Mounted environment)"
     fDebugLog 3 "* Plugin $pfx:- $(pluginHelp)"
     fDebugLog 3 "$(plugin_printkeys)"
-    fDebugLog 2 "* Plugin $pfx: Nothing to do"
+#    fDebugLog 2 "* Plugin $pfx: Nothing to do"
+#
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/$upgradeRelease-backports.list > $SDMPT/etc/apt/sources.list.d/"
+    ${cpCmd:-} "$assetDir/$upgradeRelease-backports.list" "$SDMPT/etc/apt/sources.list.d/"
+    # 
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/90_$upgradeRelease-backports > $SDMPT/etc/apt/preferences.d/"
+    $cpCmd "$assetDir/90_$upgradeRelease-backports" "$SDMPT/etc/apt/preferences.d/"
+    #
     fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" yesno 4
     #
 elif [[ "$phase" == "1" ]]
@@ -72,7 +81,7 @@ then
     fDebugLog 3 "* Plugin $pfx:- $(pluginHelp)"
     fDebugLog 3 "$(plugin_printkeys)"
     fDebugLog 2 "* Plugin $pfx: Nothing to do"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" yesno 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase 1 (in nspawn)" yesno
     #
 else
     #
@@ -82,5 +91,6 @@ else
     fDebugLog 3 "* Plugin $pfx:- $(pluginHelp)"
     fDebugLog 3 "$(plugin_printkeys)"
     fDebugLog 2 "* Plugin $pfx: Nothing to do"
-    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" yesno 4
+    fDebugLog 1 "* Plugin $pfx: Complete Phase Phase 2 (post-install)" yesno
 fi
+

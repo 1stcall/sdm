@@ -4,7 +4,7 @@ set -e
 #
 function pluginHelp(){
     # tabs in heredoc added in vscode with keybinding ctrl+k [tab]
-    cat <<-EOF 1>&2
+    cat <<-EOF
 		I: plugin: '${pfx}' phase: '${phase:-help}'
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
@@ -50,7 +50,7 @@ plugin_getargs "$pfx" "$args" "|assetDir|DEBUG|LOGPREFIX|netIface|ipAddr|dnsaddr
 #
 if ! [ -f "$SDMPT"/etc/sdm/local-assets/common.sh ] 
 then 
-    ${cpCmd:-} "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
+    cp -av "${assetDir:-}"/common.sh "$SDMPT"/etc/sdm/local-assets/common.sh
 fi
 #
 # shellcheck source=../assets/common.sh
@@ -109,7 +109,7 @@ else
     echo "denyinterfaces pattern ${netIface}" | "$teeCmd" -a "$SDMPT"/etc/dhcpcd.conf
     #
     fDebugLog 2 "> Plugin $pfx: Configuring dnsmasq"
-    $cpCmd -av "$SDMPT"/etc/sdm/local-assets/dnsmasq.* "$SDMPT"/etc/
+    $cpCmd -av "$SDMPT"/etc/sdm/local-assets/dnsmasq.conf "$SDMPT"/etc/
     #
     fDebugLog 2 "> Plugin $pfx: Configuring systemd-networkd"
     #

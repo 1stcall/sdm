@@ -4,7 +4,7 @@ set -e
 #
 function pluginHelp(){
     # tabs in heredoc added with vscode keybinding ctrl+k [tab]
-    cat <<-EOF 1>&2
+    cat <<-EOF
 		I: plugin: '${pfx}' phase: '${phase:-help}'
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
@@ -74,16 +74,6 @@ then
     fDebugLog 1 "* Plugin $pfx: Start Phase 1 (in nspawn)"
     fDebugLog 3 "$(plugin_printkeys)"
     #
-#    fDebugLog 2 "* Plugin $pfx: Enabling net forward."
-#    #
-#    $cpCmd "$SDMPT"/etc/sysctl.conf "$SDMPT"/etc/sysctl.conf.orig
-#    #
-#    # shellcheck disable=SC2002  
-#    cat "$SDMPT"/etc/sysctl.conf \
-#        | sed 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' \
-#        | sed 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' \
-#        | $teeCmd "$SDMPT"/etc/sysctl.conf
-#    #
     fDebugLog 2 "> Plugin $pfx: Installing & enabling iptables-persistent"
     doaptrpterror "install --no-install-recommends -y iptables-persistent" "${showapt:-}"
     

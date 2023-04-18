@@ -1,23 +1,25 @@
-############################################################################################################################################
-UUID="809F-3016"                        /mnt/rescuedata         vfat    defaults,noatime,nofail                                         0 0
-############################################################################################################################################
-/dev/data1/dev_thin                     /mnt/data1/dev          xfs     defaults,noatime,nofail                                         0 0
-/dev/data1/data_thin                    /mnt/data1/data         xfs     defaults,noatime,nofail                                         0 0
-/dev/data1/backup_thin                  /mnt/data1/backup       xfs     defaults,noatime,nofail                                         0 0
-/dev/data1/netboot                      /mnt/data1/netboot      xfs     defaults,noatime,nofail                                         0 0
-/dev/data1/shared                       /mnt/data1/shared       xfs     defaults,noatime,nofail                                         0 0
-############################################################################################################################################
-/dev/data2/configs                      /mnt/data2/configs      xfs     defaults,noatime,nofail                                         0 0
-############################################################################################################################################
-/mnt/data1/shared                       /srv/shared             none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-/mnt/data1/dev                          /home/carl/dev          none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-/mnt/data1/dev                          /srv/shared/dev         none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-/mnt/data1/netboot                      /srv/netboot            none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-/mnt/data1/data/var/lib/rancher         /var/lib/rancher        none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-############################################################################################################################################
-/mnt/data2/configs/home/carl/.ssh       /home/carl/.ssh         none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-/mnt/data2/configs/home/carl/.config    /home/carl/.config      none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-/mnt/data2/configs/home/carl/.local     /home/carl/.local       none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-/mnt/data2/configs/etc/exports.d        /etc/exports.d          none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-/mnt/data2/configs/etc/rancher          /etc/rancher            none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
-############################################################################################################################################
+###################################################################################################################################################
+UUID="809F-3016"                        /mnt/rescuedata         	vfat    defaults,noatime,nofail                                         0 0
+###################################################################################################################################################
+/dev/data1/dev_thin                     /mnt/data1/dev          	xfs     defaults,noatime,nofail                                         0 0
+/dev/data1/data_thin                    /mnt/data1/data         	xfs     defaults,noatime,nofail                                         0 0
+/dev/data1/backup_thin                  /mnt/data1/backup       	xfs     defaults,noatime,nofail                                         0 0
+/dev/data1/netboot                      /mnt/data1/netboot      	xfs     defaults,noatime,nofail                                         0 0
+/dev/data1/shared                       /mnt/data1/shared       	xfs     defaults,noatime,nofail                                         0 0
+###################################################################################################################################################
+/dev/data2/configs                      /mnt/data2/configs      	xfs     defaults,noatime,nofail                                         0 0
+###################################################################################################################################################
+/mnt/data1/shared                       /srv/shared             	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+/mnt/data1/dev                          /home/carl/dev          	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+/mnt/data1/dev                          /srv/shared/dev         	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+/mnt/data1/netboot                      /srv/netboot            	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+/mnt/data1/data/var/lib/rancher         /var/lib/rancher        	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+/mnt/data1/data/var/cache/apt-cacher-ng	/var/cache/apt-cacher-ng        none    defaults,noatime,bind,nofail				        0 0
+###################################################################################################################################################
+/mnt/data2/configs			/srv/shared/configs		none	defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail	0 0
+/mnt/data2/configs/home/carl/.ssh       /home/carl/.ssh         	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+/mnt/data2/configs/home/carl/.config    /home/carl/.config      	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+/mnt/data2/configs/home/carl/.local     /home/carl/.local       	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+/mnt/data2/configs/etc/exports.d        /etc/exports.d          	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+/mnt/data2/configs/etc/rancher          /etc/rancher            	none    defaults,noatime,bind,uid=1000,guid=1000,umask=022,nofail       0 0
+###################################################################################################################################################

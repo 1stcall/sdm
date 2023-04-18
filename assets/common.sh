@@ -60,16 +60,16 @@ mkdirCmd="mkdir -p";                [[ $DEBUG -ge 3 ]] && mkdirCmd="$mkdirCmd --
 function fRunAs(){
     local slCmdToRun="${1:-:}"
     local slUserToRunAs="${2:-${callingUser}}"
-    printf "Running command ${slCmdToRun}    As ${slUserToRunAs}\n" 1>&2
-    su ${callingUser} --command="${slCmdToRun}"
+    printf "Running command %s As %s\n" "${slCmdToRun}" "${slUserToRunAs}" 1>&2
+    su "${callingUser}" --command="${slCmdToRun}"
     return ${!}
 }
 #declare -fx fRunAs
 #   
 debug(){
-    while read line
+    while read -r line
     do
-        echo $line | tee -a "${outname:-/dev/null}"
+        echo "$line" | tee -a "${outname:-/dev/null}"
     done
 }
 #export debug
@@ -141,7 +141,7 @@ function fDebugLog() {
             log "[${logLvl}/${DEBUG}/${minDebugWait}] Press any key to continue..." "$logLvl" 1>&2
             read -n 1 -s -r
         elif [[ "$logWait" == "yesno" ]] && [[ "$DEBUG" -ge ${minDebugWait} ]]; then
-            log "[${logLvl}/${DEBUG}/${minDebugWait}] Do you wish to continue or S for a bash shell? (Y/N/S)" $logLvl 1>&2
+            log "[${logLvl}/${DEBUG}/${minDebugWait}] Do you wish to continue or S for a bash shell? (Y/N/S)" "$logLvl" 1>&2
             while true
                 do
                     read -r -n 1 -s choice

@@ -4,7 +4,7 @@ set -e
 #
 function pluginHelp(){
     # tabs in heredoc added with vscode keybinding ctrl+k [tab]
-    cat <<-EOF 1>&2
+    cat <<-EOF
 		I: plugin: '${pfx}' phase: '${phase:-help}'
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
@@ -93,7 +93,7 @@ then
 #    doaptrpterror "update" "${showapt}"
     fDebugLog 3 "Plugin $pfx: installing pve-manager" yesno
     doaptrpterror "remove --purge --assume-yes linux-headers-*" "${showapt:-}"
-    doaptrpterror "install --assume-yes --no-install-recommends -o Dpkg::Options::="--force-confdef" pve-manager" "$showapt"
+    doaptrpterror "install --assume-yes --no-install-recommends -o Dpkg::Options::=\"--force-confdef\" pve-manager" "$showapt"
     fDebugLog 3 "Plugin $pfx: installing proxmox-ve" yesno
     doaptrpterror "install  -y proxmox-ve" "${showapt}"
     #

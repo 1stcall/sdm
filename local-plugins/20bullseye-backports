@@ -4,7 +4,7 @@ set -e
 #
 function pluginHelp(){
     # tabs in heredoc added with vscode keybinding ctrl+k [tab]
-    cat <<-EOF 1>&2
+    cat <<-EOF
 		I: plugin: '${pfx}' phase: '${phase:-help}'
 		W: *** THIS IS STRICTLY A WORK IN PROGRESS WITH VALUES HARD CODED.  USE WITH CAUTION. ***
 
@@ -63,8 +63,8 @@ then
     fDebugLog 2 "* Plugin $pfx: Copying $assetDir/backports.list > $SDMPT/etc/apt/sources.list.d/"
     ${cpCmd:-} "$assetDir"/bullseye-backports.list "$SDMPT"/etc/apt/sources.list.d/
     #
-    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/bullseye-90_backports > $SDMPT/etc/apt/preferences.d/"
-    $cpCmd "$assetDir"/bullseye-90_backports "$SDMPT"/etc/apt/preferences.d/90_backports
+    fDebugLog 2 "* Plugin $pfx: Copying $assetDir/90_bullseye-backports > $SDMPT/etc/apt/preferences.d/"
+    $cpCmd "$assetDir"/90_bullseye-backports "$SDMPT"/etc/apt/preferences.d/
     #
     fDebugLog 1 "* Plugin $pfx: Complete Phase 0 (Mounted environment)" wait
     #

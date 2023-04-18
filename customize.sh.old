@@ -10,8 +10,6 @@ declare DEBUG
 DEBUG=${DEBUG:-0}
 declare BASEIMG
 BASEIMG=${BASEIMG:-""}
-declare RELEASE
-RELEASE=${RELEASE:-bullseye}
 #
 [ "$DEBUG" -ge 10 ]  && set -o errtrace         # If set, the ERR trap is inherited by shell functions.
 [ "$DEBUG" -ge 10 ]  && set -o errexit          # Exit immediately if a command exits with a non-zero status.
@@ -72,7 +70,7 @@ fDebugLog 3 "hostName=${hostName}"
 fDebugLog 3 "callingUser=${callingUser}"
 fDebugLog 3 "downloadUrl=${downloadUrl}"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
-fDebugLog 5 "Proceed with settings?" yesno || errexit "User aborted."
+fDebugLog 4 "Proceed with settings." yesno 4 || errexit "User aborted."
 
 if [[ ! -d "${baseDirectory}/${baseImageDirectory}/" ]]
 then
@@ -87,12 +85,12 @@ if [[ ! -e "${baseDirectory}/${baseImageDirectory}/${baseImage}" ]] ; then
     fDebugLog 0 "Downloading & extracting"
     fDebugLog 0 " ${downloadUrl}"
     fDebugLog 0 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
-    fDebugLog 5 "Proceed with download?" yesno || errexit "User aborted."
+    fDebugLog 4 "Proceed with download." yesno 4 || errexit "User aborted."
     curlOps="" && [ "$DEBUG" -ge 2 ] && curlOps="--verbose"
     su "${callingUser}" --command="curl $curlOps $downloadUrl | unxz - > ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 else
-    fDebugLog 2 "Skipping Downloading & extracting ${downloadUrl}"
-    fDebugLog 2 " to ${baseDirectory}/${baseImageDirectory}/${baseImage} because it already exists."
+    fDebugLog 2 "Skipping Downloading & extracting ${downloadUrl} because $baseImage alreay exists."
+    fDebugLog 2 " to ${baseDirectory}/${baseImageDirectory}/${baseImage}"
 fi
 
 if [[ ! -d "${baseDirectory}/output/" ]]
@@ -112,8 +110,9 @@ sdmCmd="${sdmCmd} --apt-dist-upgrade"
 sdmCmd="${sdmCmd} --disable piwiz,swap"
 sdmCmd="${sdmCmd} --l10n"
 sdmCmd="${sdmCmd} --restart 1"
+#[[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showapt"
 sdmCmd="${sdmCmd} --showapt"
-sdmCmd="${sdmCmd} --showpwd"
+[[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --showpwd"
 sdmCmd="${sdmCmd} --wpa ${baseDirectory}/assets/wpa_supplicant.conf"
 sdmCmd="${sdmCmd} --batch"
 sdmCmd="${sdmCmd} --extend"
@@ -122,15 +121,19 @@ sdmCmd="${sdmCmd} --poptions apps"
 sdmCmd="${sdmCmd} --apps @${baseDirectory}/assets/1stcall.applist"
 sdmCmd="${sdmCmd} --rename-pi carl"
 sdmCmd="${sdmCmd} --password-pi letmein123"
+#sdmCmd="${sdmCmd} --user carl"
+#sdmCmd="${sdmCmd} --password-user letmein123"
+#sdmCmd="${sdmCmd} --plugin apt-file"
 # shellcheck disable=SC2089
 sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/10mydotfiles:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
-sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/15upgrade-to-x:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}|upgradeRelease=$RELEASE"
-[[ ! $RELEASE == sid ]] && sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/20config-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}|upgradeRelease=$RELEASE"
+#sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/20bullseye-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
+sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/20bookworm-backports:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
 sdmCmd="${sdmCmd} --plugin ${baseDirectory}/local-plugins/50btfix:assetDir=\"${baseDirectory}/assets\"|DEBUG=${DEBUG}|LOGPREFIX=${scriptName}"
-sdmCmd="${sdmCmd} --plugin-debug"
+[[ $DEBUG -ge 3 ]] && sdmCmd="${sdmCmd} --plugin-debug"
+#sdmCmd="${sdmCmd} --aptcache 192.168.0.42"
 sdmCmd="${sdmCmd} --aptcache rpicm4-1.1stcall.uk"
 fDebugLog 1 "Running ${sdmCmd}"
-fDebugLog 5 "Proceed with running comman?" yesno || errexit "User aborted."
+fDebugLog 4 "Proceed running command." yesno 4 || errexit "User aborted."
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
 fDebugLog 3 "${LYELLOW}| Start Output from sdm --custmoize              |"
 fDebugLog 3 "${LYELLOW}--------------------------------------------------"
