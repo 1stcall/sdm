@@ -45,7 +45,7 @@ if [[ -f "${baseDirectory}/output/${hostName}-${RELEASE}-out.img" ]] ; then
         rm -f "${baseDirectory}/output/${hostName}-${RELEASE}-out.img.old"
     fi
     fDebugLog 1 "Backing up existing image ${baseDirectory}/output/${hostName}-${RELEASE}-out.img"
-    mv -v "${baseDirectory}/output/${hostName}-out.img" "${baseDirectory}/output/${hostName}-${RELEASE}-out.img.old"
+    mv -v "${baseDirectory}/output/${hostName}-${RELEASE}-out.img" "${baseDirectory}/output/${hostName}-${RELEASE}-out.img.old"
 fi
 
 fDebugLog 1 "${scriptName} is Running ${baseDirectory}/sdm --burnfile"

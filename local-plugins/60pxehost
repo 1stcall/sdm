@@ -109,7 +109,9 @@ else
     echo "denyinterfaces pattern ${netIface}" | "$teeCmd" -a "$SDMPT"/etc/dhcpcd.conf
     #
     fDebugLog 2 "> Plugin $pfx: Configuring dnsmasq"
-    $cpCmd -av "$SDMPT"/etc/sdm/local-assets/dnsmasq.conf "$SDMPT"/etc/
+    $cpCmd "$SDMPT"/etc/sdm/local-assets/dnsmasq.conf "$SDMPT"/etc/
+    $cpCmd "$SDMPT"/etc/sdm/local-assets/dnsmasq.d/* "$SDMPT"/etc/dnsmasq.d/
+    
     #
     fDebugLog 2 "> Plugin $pfx: Configuring systemd-networkd"
     #
